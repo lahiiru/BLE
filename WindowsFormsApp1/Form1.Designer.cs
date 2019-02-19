@@ -38,11 +38,13 @@
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
+            this.id = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.SuspendLayout();
             // 
             // listView1
             // 
             this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.id,
             this.ip,
             this.LastPing,
             this.upTime,
@@ -51,7 +53,7 @@
             this.listView1.MultiSelect = false;
             this.listView1.Name = "listView1";
             this.listView1.ShowGroups = false;
-            this.listView1.Size = new System.Drawing.Size(692, 348);
+            this.listView1.Size = new System.Drawing.Size(752, 348);
             this.listView1.Sorting = System.Windows.Forms.SortOrder.Descending;
             this.listView1.TabIndex = 0;
             this.listView1.TileSize = new System.Drawing.Size(1, 1);
@@ -89,7 +91,7 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 13.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(570, 23);
+            this.label1.Location = new System.Drawing.Point(630, 23);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(144, 29);
             this.label1.TabIndex = 1;
@@ -105,11 +107,16 @@
             this.label2.TabIndex = 2;
             this.label2.Text = "0.0.0.0";
             // 
+            // id
+            // 
+            this.id.Text = "ID";
+            this.id.Width = 100;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(737, 438);
+            this.ClientSize = new System.Drawing.Size(786, 438);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.listView1);
@@ -119,7 +126,6 @@
             this.Name = "Form1";
             this.Text = "Dashboard";
             this.Load += new System.EventHandler(this.Form1_Load);
-            this.FormClosed += (this.Form1_Closed);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -135,6 +141,7 @@
         private System.Windows.Forms.ColumnHeader battery;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.ColumnHeader id;
     }
 }
 

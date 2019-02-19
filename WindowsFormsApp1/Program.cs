@@ -73,7 +73,7 @@ namespace WindowsFormsApp1
                     BeaconNode node = nodes[ip];
                     parseFrame(node, data);
                 
-                    data = BuildManagementFrame(ip);
+                    data = BuildManagementFrame(ip, node);
                     newsock.Send(data, data.Length, sender);
                 }
             }
@@ -89,14 +89,18 @@ namespace WindowsFormsApp1
             string[] tokens = stringFrame.Split(':');
             node.lastPing = DateTime.Now;
             node.status = tokens[0];
-            node.upTimeMinutes = int.Parse(tokens[1]);
-            node.batteryLevel = int.Parse(tokens[2]);
+            node.id = tokens[1];
+            node.upTimeMinutes = int.Parse(tokens[2]);
+            node.batteryLevel = int.Parse(tokens[3]);
         }
 
 
 
-        private static byte[] BuildManagementFrame(string ip) {
+        private static byte[] BuildManagementFrame(string ip, BeaconNode node) {
             string managementFrame = "OK";
+            if (node.id == "not-set") {
+                managementFrame = "ID:" + node.tempId;
+            }
             return Encoding.ASCII.GetBytes(managementFrame);
         }
 

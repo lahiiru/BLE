@@ -72,8 +72,9 @@ namespace WindowsFormsApp1
             {
                 if (!listView1.Items.ContainsKey(node.Value.ipAddress))
                 {
-                    ListViewItem lv = new ListViewItem(node.Value.ipAddress);
+                    ListViewItem lv = new ListViewItem(node.Value.id);
                     lv.Name = node.Value.ipAddress;
+                    lv.SubItems.Add(node.Value.ipAddress);
                     lv.SubItems.Add(node.Value.lastPing.ToString());
                     lv.SubItems.Add(node.Value.upTimeMinutes.ToString());
                     lv.SubItems.Add(node.Value.batteryLevel.ToString());
@@ -81,10 +82,11 @@ namespace WindowsFormsApp1
                 }
                 else {
                     ListViewItem lv = listView1.Items.Find(node.Value.ipAddress, false)[0];
-                    lv.SubItems[0].Text = node.Value.ipAddress;
-                    lv.SubItems[1].Text = node.Value.lastPing.ToString();
-                    lv.SubItems[2].Text = node.Value.upTimeMinutes.ToString();
-                    lv.SubItems[3].Text = node.Value.batteryLevel.ToString();
+                    lv.SubItems[0].Text = node.Value.id;
+                    lv.SubItems[1].Text = node.Value.ipAddress;
+                    lv.SubItems[2].Text = node.Value.lastPing.ToString();
+                    lv.SubItems[3].Text = node.Value.upTimeMinutes.ToString();
+                    lv.SubItems[4].Text = node.Value.batteryLevel.ToString();
                 }
             }
             listView1.EndUpdate();

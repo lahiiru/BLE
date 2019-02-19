@@ -4,6 +4,7 @@ from time import sleep
 from uptime import uptime
 import time
 import os
+# sudo apt-get install python3-pip
 # sudo pip3 install uptime
 # grep cron -A5 /var/log/syslog
 # @reboot sudo python3 /home/pi/beacon_udp.py
@@ -11,6 +12,7 @@ import os
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.settimeout(5)
 server_address = ('192.168.8.102', 9091)
+node_id = "not-set";
 
 def enableBLE():
     print('enabling BLE')
@@ -40,13 +42,21 @@ def send(message_str):
 
         # receive some data
         data, addr = sock.recvfrom(1024)
-
-        print(data)
+        handleAck(data)
     except Exception as e:
         print(e)
         sleep(10)
         connected = False
 
+def handleAck(data):
+    d = data.decode("utf-8")
+    global node_id
+    hed = d[:2]
+    dat = d[3:]
+    print(hed, dat)
+    if hed == "ID":
+        node_id = dat
+    
 def getUptimeMinutes():
     return int(uptime())
 
@@ -59,6 +69,6 @@ sleep(2)
 setBeaconInfo()
 while 1:
     connect()
-    frame = 'OK:{}:{}'.format(getUptimeMinutes(),getBattery())
+    frame = 'OK:{}:{}:{}'.format(node_id, getUptimeMinutes(),getBattery())
     send(frame)
     sleep(10)

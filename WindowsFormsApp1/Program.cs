@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 
-namespace WindowsFormsApp1
+namespace BeaconManager
 {
     static class Program
     {
@@ -27,12 +27,11 @@ namespace WindowsFormsApp1
             Process[] AllProcesses = Process.GetProcessesByName(ThisProcess.ProcessName);
             if (AllProcesses.Length > 1)
             {
-                //Don't put a MessageBox in here because the user could spam this MessageBox.
+                // Exit silently if one instance fo the BeaconManager is already running.
                 return;
             }
-
-            listen = new TcpListener(IPAddress.Parse("0.0.0.0"), 9091);
-            serverthread = new Thread(new ThreadStart(DoListen));
+            
+            serverthread = new Thread(new ThreadStart(DoListen)); // register UDP comminication handler thread
             serverthread.Start();
 
             Application.EnableVisualStyles();
@@ -40,16 +39,17 @@ namespace WindowsFormsApp1
             Application.Run(new Form1());
         }
 
-
+        /// <summary>
+        /// Listner thread's method
+        /// </summary>
         private static void DoListen()
         {
             byte[] data = new byte[1024];
-            IPEndPoint ipep = new IPEndPoint(IPAddress.Any, 9091);
+            IPEndPoint ipep = new IPEndPoint(IPAddress.Any, 9091); // start listnening on port
             UdpClient newsock = new UdpClient(ipep);
 
-            Console.WriteLine("Waiting for a client...");
+            IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0); // empty sender is needed as reference to catch senders information
 
-            IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0);
             /*
                 //TODO: New thread with client
                 Thread clientThread = new Thread(new ParameterizedThreadStart(DoClient));
@@ -58,35 +58,40 @@ namespace WindowsFormsApp1
 
             while (active)
             {
-                data = newsock.Receive(ref sender);
-                string port = sender.ToString();
+                Console.WriteLine("Waiting for a client...");
+                data = newsock.Receive(ref sender); // here we wait until a message of node comes
+                
+                string port = sender.ToString(); // node's ip details
                 string ip = port.Split(':')[0];
                 Console.WriteLine("Connected {0}:", port);
 
-                if (ip.Count(f => f == '.').Equals(3))
+                if (ip.Count(f => f == '.').Equals(3)) // if node does not provides a valid ip address do nothing 
                 {
-                    if (!nodes.ContainsKey(ip))
+                    if (!nodes.ContainsKey(ip)) // if we don't have a node object for this ip
                     {
                         Console.WriteLine("Creating new node for {0}", ip);
-                        nodes.Add(ip, new BeaconNode(ip));
+                        nodes.Add(ip, new BeaconNode(ip)); // create new one and add to the node list
                     }
-                    BeaconNode node = nodes[ip];
-                    parseFrame(node, data);
+                    BeaconNode node = nodes[ip]; // take the relevant node from the list
+                    ParseFrame(node, data); // ask to extract information from data buffer and update fields in node object
                 
-                    data = BuildManagementFrame(ip, node);
-                    newsock.Send(data, data.Length, sender);
+                    data = BuildManagementFrame(ip, node); // ask to build the response needs to be send to the given node
+                    newsock.Send(data, data.Length, sender); // send server response
                 }
             }
-
+            
             newsock.Close();
-            listen.Stop();
-          
         }
 
-        private static void parseFrame(BeaconNode node, byte[] frame) {
-            string stringFrame = Encoding.ASCII.GetString(frame, 0, frame.Length);
+        /// <summary>
+        /// Extract information from data buffer and update fields in node object
+        /// </summary>
+        /// <param name="node"></param>
+        /// <param name="frame"></param>
+        private static void ParseFrame(BeaconNode node, byte[] frame) {
+            string stringFrame = Encoding.ASCII.GetString(frame, 0, frame.Length); // can use ASCII or UTF8
             Console.WriteLine(stringFrame);
-            string[] tokens = stringFrame.Split(':');
+            string[] tokens = stringFrame.Split(':'); // comming data seperated by :
             node.lastPing = DateTime.Now;
             node.status = tokens[0];
             node.id = tokens[1];
@@ -95,52 +100,20 @@ namespace WindowsFormsApp1
         }
 
 
-
+        /// <summary>
+        /// Build the response needs to be send to the given node
+        /// </summary>
+        /// <param name="ip"></param>
+        /// <param name="node"></param>
+        /// <returns></returns>
         private static byte[] BuildManagementFrame(string ip, BeaconNode node) {
             string managementFrame = "OK";
-            if (node.id == "not-set") {
+            if (node.id == "not-set") { // if client id is in not-set status, we need to tell an id
                 managementFrame = "ID:" + node.tempId;
             }
             return Encoding.ASCII.GetBytes(managementFrame);
         }
 
-        private static void DoClient(object client)
-        {
-            // Read data
-            TcpClient tClient = (TcpClient)client;
-            tClient.ReceiveBufferSize = 1024;
-
-            Console.WriteLine("Client (Thread: {0}): Connected!", Thread.CurrentThread.ManagedThreadId);
-            do
-            {
-                if (!tClient.Connected)
-                {
-                    Console.WriteLine("Killing thread (Thread: {0})", Thread.CurrentThread.ManagedThreadId);
-                    tClient.Close();
-                    Thread.CurrentThread.Abort();       // Kill thread.
-                }
-
-                if (tClient.Available > 0)
-                {
-                    // Reads NetworkStream into a byte buffer.
-                    byte[] buffer = new byte[tClient.ReceiveBufferSize];
-
-                    // Read can return anything from 0 to numBytesToRead.
-                    // This method blocks until at least one byte is read.
-                    int s = tClient.GetStream().Read(buffer, 0, (int)tClient.ReceiveBufferSize);
-                    byte[] bytes = new byte[s];
-                    Buffer.BlockCopy(buffer, 0, bytes, 0, s);
-                    // Returns the data received from the host to the console.
-                    string returndata = Encoding.UTF8.GetString(bytes);
-                    // Resend
-                    Console.WriteLine("Client (Thread: {0}): Data {1}", Thread.CurrentThread.ManagedThreadId, returndata);
-                    tClient.GetStream().Write(bytes, 0, bytes.Length);
-                }
-
-                // Pause
-                Thread.Sleep(100);
-            } while (true);
-        }
     }
 
     // Implements the manual sorting of items by columns.

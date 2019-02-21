@@ -1,17 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Windows.Forms;
 
-namespace WindowsFormsApp1
+namespace BeaconManager
 {
     public partial class Form1 : Form
     {
-
-
         public Form1()
         {
             InitializeComponent();
@@ -19,20 +16,24 @@ namespace WindowsFormsApp1
 
         private void Form1_Closed(object sender, EventArgs e)
         {
-            Program.active = false;
-            Environment.Exit(1);
+            Environment.Exit(1); // stop the application including running listner threads
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            string ip = findIP();
+            string ip = FindIP(); // 
             if (ip == null) {
                 MessageBox.Show("Connect to a WIFI access point first.", "No connect WIFI interface found.", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             label2.Text = ip;
         }
 
-        private string findIP() {
+        /// <summary>
+        /// Find IP address of WIFI interface by iteration over all interfaces. 
+        /// This IP should be a static one and need to be added to the python script in nodes
+        /// </summary>
+        /// <returns></returns>
+        private string FindIP() {
             foreach (NetworkInterface ni in NetworkInterface.GetAllNetworkInterfaces())
             {
                 if (ni.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 && ni.OperationalStatus == OperationalStatus.Up)
@@ -64,23 +65,28 @@ namespace WindowsFormsApp1
 
         }
 
-        private void timer1_Tick(object sender, EventArgs e)
+        /// <summary>
+        /// Repeatedly update to List View with <code>Program.nodes</code>
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Timer1_Tick(object sender, EventArgs e)
         {
             label1.Text = DateTime.Now.ToLongTimeString();
-            listView1.BeginUpdate();
+            listView1.BeginUpdate(); // Tell GUI to catch the update
             foreach (KeyValuePair<string, BeaconNode> node in Program.nodes.OrderBy(i => i.Value.lastPing))
             {
-                if (!listView1.Items.ContainsKey(node.Value.ipAddress))
+                if (!listView1.Items.ContainsKey(node.Value.ipAddress)) // Add if it not in the list view
                 {
-                    ListViewItem lv = new ListViewItem(node.Value.id);
-                    lv.Name = node.Value.ipAddress;
-                    lv.SubItems.Add(node.Value.ipAddress);
-                    lv.SubItems.Add(node.Value.lastPing.ToString());
+                    ListViewItem lv = new ListViewItem(node.Value.id); // initiate with 1st column value
+                    lv.Name = node.Value.ipAddress; // set the identifier of the list view item. it's ip
+                    lv.SubItems.Add(node.Value.ipAddress); // set 2nd column values
+                    lv.SubItems.Add(node.Value.lastPing.ToString()); // 3rd column values
                     lv.SubItems.Add(node.Value.upTimeMinutes.ToString());
                     lv.SubItems.Add(node.Value.batteryLevel.ToString());
                     listView1.Items.Add(lv);
                 }
-                else {
+                else { // update if already in the list view
                     ListViewItem lv = listView1.Items.Find(node.Value.ipAddress, false)[0];
                     lv.SubItems[0].Text = node.Value.id;
                     lv.SubItems[1].Text = node.Value.ipAddress;

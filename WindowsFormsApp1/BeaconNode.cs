@@ -1,20 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace WindowsFormsApp1
+namespace BeaconManager
 {
+    /// <summary>
+    /// Holds the status data of a beacon node. Simply, this is the data structure for a beacon node
+    /// IP address is the program level unique identifier
+    /// </summary>
     class BeaconNode
     {
+        // attributes of the node. 
+        // always update according to the node's status update message
+        // should not change in other places
         public string ipAddress;
         public int batteryLevel;
         public int upTimeMinutes;
         public DateTime lastPing;
         public string status;
         public string id;
-        public string tempId;
+        // additional control variables
+        public string tempId; // Holds newly created node ID. Until node picks it up.
         public bool fresh = true;
 
         public BeaconNode(string ipAddress)

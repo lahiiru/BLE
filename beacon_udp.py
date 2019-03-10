@@ -1,9 +1,8 @@
 import socket
-import sys
 from time import sleep
 from uptime import uptime
-import time
 import os
+import re, uuid
 
 # if you are setting up from the scratch. please use follwoing commands.
 # install dependencies
@@ -27,13 +26,8 @@ node_id = "not-set"
 
 
 def enable_ble():
-    print('enabling BLE')
-    os.system('sudo hciconfig hci0 up && sudo hciconfig hci0 leadv 3')
-
-
-def set_beacon_info():
-    print('configuring beacon data')
-    os.system('sudo hcitool -i hci0 cmd 0x08 0x0008 13 02 01 06 03 03 aa fe 0b 16 aa fe 10 00 03 74 65 73 74 07 00 00 00 00 00 00 00 00 00 00 00 00')
+    print('enabling bluetooth')
+    os.system('sudo systemctl start bluetooth.service && sudo hciconfig hci0 up')
 
 
 def connect():
@@ -64,7 +58,7 @@ def send(message_str):
         # receive some data
         data, addr = sock.recvfrom(1024)
         # process server response
-        handleAck(data)
+        handle_ack(data)
     except Exception as e:
         print(e)
         sleep(10)
@@ -101,13 +95,16 @@ def get_battery():
     return 50
 
 
+def get_bluetooth_mac():
+    return ':'.join(re.findall('..', '%012x' % uuid.getnode())).upper()
+
+
 sleep(10)  # wait device to initialize wireless modules
-enable_ble()  # enable BLE mode
+enable_ble()
 sleep(2)
-setBeaconInfo()  # configure what to broadcast
 
 while True:  # repeatedly send status/ping messages
     connect()  # ensure the connectivity
-    frame = 'OK:{}:{}:{}'.format(node_id, getUptimeMinutes(),getBattery())
+    frame = 'OK:{}:{}:{}:{}'.format(node_id, get_uptime_minutes(), get_battery(), get_bluetooth_mac())
     send(frame)
     sleep(10)  # should be > 60 sec wait in production

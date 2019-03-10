@@ -11,7 +11,10 @@ print(dev_mac)
 
 def enable_ble():
     print('enabling bluetooth')
-    os.system('sudo systemctl start bluetooth.service && sudo hciconfig hci0 up')
+    try:
+        os.system('sudo systemctl start bluetooth.service && sudo hciconfig hci0 up')
+    except Exception as e:
+        print(e)
 
 
 def job():

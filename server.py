@@ -8,7 +8,7 @@ server_socket.listen(1)
 advertise_service(server_socket, "helloService",
                      service_classes=[SERIAL_PORT_CLASS],
                      profiles=[SERIAL_PORT_PROFILE])
-
+#hciconfig hci0 piscan
 while True:
     try:
         client_socket, address = server_socket.accept()

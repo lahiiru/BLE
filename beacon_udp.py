@@ -161,6 +161,9 @@ def process_scatter_link():
 
 def get_all_devices():
     data = f.read()
+    if len(data) > 0:
+        s = eval(data)
+        data = '%s'%devices.union(s)
     return data
 
 def process_management_link():
@@ -174,6 +177,7 @@ def process_management_link():
         get_all_devices()
     )
     send(frame)
+    print("Sent data: " + frame)
 
 
 def get_bluetooth_mac():

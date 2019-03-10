@@ -1,10 +1,10 @@
 C:\Users\LahiruJ\source\repos\WindowsFormsApp1\WindowsFormsApp1\bin\Debug\BeaconManager.exe.config
 C:\Users\LahiruJ\source\repos\WindowsFormsApp1\WindowsFormsApp1\bin\Debug\BeaconManager.exe
 C:\Users\LahiruJ\source\repos\WindowsFormsApp1\WindowsFormsApp1\bin\Debug\BeaconManager.pdb
-C:\Users\LahiruJ\source\repos\WindowsFormsApp1\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.Form1.resources
 C:\Users\LahiruJ\source\repos\WindowsFormsApp1\WindowsFormsApp1\obj\Debug\BeaconManager.Properties.Resources.resources
 C:\Users\LahiruJ\source\repos\WindowsFormsApp1\WindowsFormsApp1\obj\Debug\BeaconManager.csproj.GenerateResource.cache
 C:\Users\LahiruJ\source\repos\WindowsFormsApp1\WindowsFormsApp1\obj\Debug\BeaconManager.csproj.CoreCompileInputs.cache
 C:\Users\LahiruJ\source\repos\WindowsFormsApp1\WindowsFormsApp1\obj\Debug\BeaconManager.exe
 C:\Users\LahiruJ\source\repos\WindowsFormsApp1\WindowsFormsApp1\obj\Debug\BeaconManager.pdb
 C:\Users\LahiruJ\source\repos\WindowsFormsApp1\WindowsFormsApp1\obj\Debug\BeaconManager.csprojAssemblyReference.cache
+C:\Users\LahiruJ\source\repos\WindowsFormsApp1\WindowsFormsApp1\obj\Debug\BeaconManager.Form1.resources

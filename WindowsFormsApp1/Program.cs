@@ -14,8 +14,10 @@ namespace BeaconManager
     static class Program
     {
         static TcpListener listen;
+        static Form1 form;
         public static Thread serverthread;
         public static bool active = true;
+        public static string log = "";
         public static readonly Dictionary<string, BeaconNode> nodes = new Dictionary<string, BeaconNode>();
         /// <summary>
         /// The main entry point for the application.
@@ -36,7 +38,8 @@ namespace BeaconManager
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+            form = new Form1();
+            Application.Run(form);
         }
 
         /// <summary>
@@ -91,14 +94,16 @@ namespace BeaconManager
         private static void ParseFrame(BeaconNode node, byte[] frame) {
             string stringFrame = Encoding.ASCII.GetString(frame, 0, frame.Length); // can use ASCII or UTF8
             Console.WriteLine(stringFrame);
-            string[] tokens = stringFrame.Split(':'); // comming data seperated by :
+            string[] tokens = stringFrame.Split('`'); // comming data seperated by :
             node.lastPing = DateTime.Now;
             node.status = tokens[0];
             node.id = tokens[1];
             node.upTimeMinutes = int.Parse(tokens[2]);
             node.batteryLevel = int.Parse(tokens[3]);
+            node.macAddress = tokens[4];
+            string data = tokens[5];
+            log = DateTime.Now.ToLongTimeString() + ":  " + node.macAddress + " says it has discovered " + data + Environment.NewLine + log;
         }
-
 
         /// <summary>
         /// Build the response needs to be send to the given node

@@ -65,6 +65,16 @@ namespace BeaconManager
 
         }
 
+        public TextBox LogBox
+        {
+            get { return textBox1; }
+        }
+
+        public void Log()
+        {
+            textBox1.Text = Program.log;
+        }
+
         /// <summary>
         /// Repeatedly update to List View with <code>Program.nodes</code>
         /// </summary>
@@ -72,6 +82,7 @@ namespace BeaconManager
         /// <param name="e"></param>
         private void Timer1_Tick(object sender, EventArgs e)
         {
+            Log();
             label1.Text = DateTime.Now.ToLongTimeString();
             listView1.BeginUpdate(); // Tell GUI to catch the update
             foreach (KeyValuePair<string, BeaconNode> node in Program.nodes.OrderBy(i => i.Value.lastPing))
@@ -81,7 +92,8 @@ namespace BeaconManager
                     ListViewItem lv = new ListViewItem(node.Value.id); // initiate with 1st column value
                     lv.Name = node.Value.ipAddress; // set the identifier of the list view item. it's ip
                     lv.SubItems.Add(node.Value.ipAddress); // set 2nd column values
-                    lv.SubItems.Add(node.Value.lastPing.ToString()); // 3rd column values
+                    lv.SubItems.Add(node.Value.macAddress);
+                    lv.SubItems.Add(node.Value.lastPing.ToString()); // 4th column values
                     lv.SubItems.Add(node.Value.upTimeMinutes.ToString());
                     lv.SubItems.Add(node.Value.batteryLevel.ToString());
                     listView1.Items.Add(lv);
@@ -90,9 +102,10 @@ namespace BeaconManager
                     ListViewItem lv = listView1.Items.Find(node.Value.ipAddress, false)[0];
                     lv.SubItems[0].Text = node.Value.id;
                     lv.SubItems[1].Text = node.Value.ipAddress;
-                    lv.SubItems[2].Text = node.Value.lastPing.ToString();
-                    lv.SubItems[3].Text = node.Value.upTimeMinutes.ToString();
-                    lv.SubItems[4].Text = node.Value.batteryLevel.ToString();
+                    lv.SubItems[2].Text = node.Value.macAddress;
+                    lv.SubItems[3].Text = node.Value.lastPing.ToString();
+                    lv.SubItems[4].Text = node.Value.upTimeMinutes.ToString();
+                    lv.SubItems[5].Text = node.Value.batteryLevel.ToString();
                 }
             }
             listView1.EndUpdate();

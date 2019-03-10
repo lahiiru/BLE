@@ -14,6 +14,7 @@ namespace BeaconManager
         public string ipAddress;
         public int batteryLevel;
         public int upTimeMinutes;
+        public string macAddress;
         public DateTime lastPing;
         public string status;
         public string id;

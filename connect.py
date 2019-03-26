@@ -61,4 +61,4 @@ def read_data(address):
 
 
 scan()
-read_data("B8:27:EB:E9:56:52")
+read_data("b8:27:eb:86:40:31")

@@ -4,7 +4,10 @@ from uptime import uptime
 import os
 import re, uuid
 from bluetooth import *
-from bluepy.btle import Scanner, DefaultDelegate, BTLEException
+from bluepy import btle
+import struct
+from bluepy.btle import Scanner, DefaultDelegate
+import json
 
 # if you are setting up from the scratch. please use follwoing commands.
 # install dependencies
@@ -29,8 +32,10 @@ f = open('global_devices.txt', 'r')
 devices = set()
 global_devices = set()
 devices_to_update = set()
+devices_info = dict()
 SVC_UUID = "12341000-1234-1234-1234-123456789abc"
-
+DEV_IDS_CHR = "6E400003-B5A3-F393-E0A9-E50E24DCCA9A"
+DEV_ATTR_CHRC = '6E400003-B5A3-F393-E0A9-E50E24DCCA9B'
 
 class ScanDelegate(DefaultDelegate):
     def __init__(self):
@@ -42,6 +47,50 @@ class ScanDelegate(DefaultDelegate):
         elif isNewData:
             print("Received new data from", dev.addr)
 
+def scan():
+    devices_set = set()
+    scanner = Scanner().withDelegate(ScanDelegate())
+    devices = scanner.scan(10.0)
+    for dev in devices:
+        for (adtype, desc, value) in dev.getScanData():
+            if value == SVC_UUID:
+                print("Device %s (%s), RSSI=%d dB" % (dev.addr, dev.addrType, dev.rssi))
+                obj = devices_info.get(dev.addr)
+                if obj is None:
+                    devices_info[dev.addr] = {}
+                devices_info.get(dev.addr)["rssi"] = dev.rssi
+                print("  %s = %s" % (desc, value))
+                devices_set.add(dev.addr)
+    return devices_set
+
+
+def read_data(address):
+    print("Connecting to", address)
+    data = ''
+    tries = 5
+    while tries > 0:
+        try:
+            tries -= 1
+            dev = btle.Peripheral(address)
+            service = dev.getServiceByUUID(btle.UUID(SVC_UUID))
+            for svc in dev.services:
+                print(str(svc))
+            for ch in service.getCharacteristics():
+                print(str(ch))
+            idsChrc = service.getCharacteristics(btle.UUID(DEV_IDS_CHR))[0]
+            attrChrc = service.getCharacteristics(btle.UUID(DEV_ATTR_CHRC))[0]
+            idsBytes = idsChrc.read()
+            attrBytes = attrChrc.read()
+            ids = bytes(idsBytes)
+            attrs = bytes(attrBytes).decode('utf-8')
+            print("ids, attrs", ids, attrs)
+            devices_info.get(address)["id"] = struct.unpack('H', ids)
+            devices_info.get(address)["attr"] = attrs
+            print(json.dumps(devices_info))
+            break
+        except Exception as e:
+            print(e)
+    return data
 
 def enable_ble():
     print('enabling bluetooth')
@@ -117,19 +166,6 @@ def get_battery():
     return 50
 
 
-def scan():
-    new_devices = set()
-    scanner = Scanner().withDelegate(ScanDelegate())
-    devices = scanner.scan(2.0)
-    for dev in devices:
-        for (adtype, desc, value) in dev.getScanData():
-            if value == SVC_UUID:
-                print("Device %s (%s), RSSI=%d dB" % (dev.addr, dev.addrType, dev.rssi))
-                print("  %s = %s" % (desc, value))
-                new_devices.add(dev.addr)
-    return new_devices
-
-
 def process_scatter_link():
     print("\n\nPerforming inquiry...")
     global devices_to_update
@@ -161,25 +197,27 @@ def process_scatter_link():
         print("Update message = %s" % update_message)
         for addr in devices_to_update.copy():
             try:
-                print("Connecting to %s to send updated list" % addr)
-                client_socket = BluetoothSocket(RFCOMM)
-                client_socket.connect((addr, 1))
-
-                client_socket.send(update_message)
-                print("Sent to %s" % addr)
-                client_socket.close()
+                read_data(addr)
+                # print("Connecting to %s to send updated list" % addr)
+                # client_socket = BluetoothSocket(RFCOMM)
+                # client_socket.connect((addr, 1))
+                #
+                # client_socket.send(update_message)
+                # print("Sent to %s" % addr)
+                # client_socket.close()
                 devices_to_update.remove(addr)
             except Exception as e:
                 print(e)
     else:
         print("No updates to send")
 
-def get_all_devices():
-    data = f.read()
-    if len(data) > 0:
-        s = eval(data)
-        data = '%s'%devices.union(s)
-    return data
+
+# def get_all_devices():
+#     data = f.read()
+#     if len(data) > 0:
+#         s = eval(data)
+#         data = '%s'%devices.union(s)
+#     return data
 
 def process_management_link():
     print('Connecting to management app...')
@@ -189,7 +227,7 @@ def process_management_link():
         get_uptime_minutes(),
         get_battery(),
         get_bluetooth_mac(),
-        get_all_devices()
+        json.dumps(devices_info)
     )
     send(frame)
     print("Sent data: " + frame)

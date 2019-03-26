@@ -57,6 +57,7 @@ class DeviceAttrChrc(localGATT.Characteristic):
         array = getByteArrayFromString("123456789...")
         return dbus.Array(array)
 
+
 class ble:
     def __init__(self):
         self.bus = dbus.SystemBus()
@@ -91,18 +92,18 @@ class ble:
         # self.light.StartNotify()
         self.app.start()
 
-def writeBytes(file, value = 255):
+def writeBytes(file, value = 65535):
     f = None
     try:
         f = open(file, "wb+")
-        f.write(struct.pack('B', value))
+        f.write(struct.pack('H', value))
     finally:
         if f is not None:
             f.close()
 
 def readBytesAsValue(file):
     b = readBytes(file)
-    return struct.unpack('B', b)
+    return struct.unpack('H', b)
 
 def readBytes(file):
     f = None

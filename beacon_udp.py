@@ -4,6 +4,7 @@ from uptime import uptime
 import os
 import re, uuid
 from bluetooth import *
+from bluepy.btle import Scanner, DefaultDelegate, BTLEException
 
 # if you are setting up from the scratch. please use follwoing commands.
 # install dependencies
@@ -28,6 +29,18 @@ f = open('global_devices.txt', 'r')
 devices = set()
 global_devices = set()
 devices_to_update = set()
+SVC_UUID = "12341000-1234-1234-1234-123456789abc"
+
+
+class ScanDelegate(DefaultDelegate):
+    def __init__(self):
+        DefaultDelegate.__init__(self)
+
+    def handleDiscovery(self, dev, isNewDev, isNewData):
+        if isNewDev:
+            print("Discovered device", dev.addr)
+        elif isNewData:
+            print("Received new data from", dev.addr)
 
 
 def enable_ble():
@@ -104,22 +117,24 @@ def get_battery():
     return 50
 
 
+def scan():
+    new_devices = set()
+    scanner = Scanner().withDelegate(ScanDelegate())
+    devices = scanner.scan(2.0)
+    for dev in devices:
+        for (adtype, desc, value) in dev.getScanData():
+            if value == SVC_UUID:
+                print("Device %s (%s), RSSI=%d dB" % (dev.addr, dev.addrType, dev.rssi))
+                print("  %s = %s" % (desc, value))
+                new_devices.add(dev.addr)
+    return new_devices
+
+
 def process_scatter_link():
     print("\n\nPerforming inquiry...")
-    new_devices = set()
     global devices_to_update
 
-    services = find_service(name="helloService")
-    print(services)
-
-    for i in range(len(services)):
-        match = services[i]
-        if match["name"] == "helloService":
-            port = match["port"]
-            name = match["name"]
-            host = match["host"]
-            print(name, port, host)
-            new_devices.add(host)
+    new_devices = scan()
 
     devices_diff_set = devices.symmetric_difference(new_devices)
     print("Diff set = %s"%devices_diff_set)

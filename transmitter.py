@@ -54,7 +54,7 @@ class DeviceAttrChrc(localGATT.Characteristic):
 
     def ReadValue(self, options):
         print("A device is reading attribute profile")
-        array = getByteArrayFromString("123456789...")
+        array = getByteArrayFromString("batt=20%")
         return dbus.Array(array)
 
 

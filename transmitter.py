@@ -37,7 +37,7 @@ class DeviceIDsChrc(localGATT.Characteristic):
                                           ['read'])
 
     def ReadValue(self, options):
-        print("ReadValueID")
+        print("A device is reading ID profile")
         bs = readBytes('id')
         array = getByteArrayFromBytes(bs)
         return dbus.Array(array)
@@ -54,9 +54,10 @@ class DeviceAttrChrc(localGATT.Characteristic):
                                           ['read'])
 
     def ReadValue(self, options):
-        print("ReadValue")
-        array = getByteArrayFromString("123456789...")
+        print("A device is reading attribute profile")
+        array = getByteArrayFromString("batt=20%")
         return dbus.Array(array)
+
 
 class ble:
     def __init__(self):
@@ -92,18 +93,18 @@ class ble:
         # self.light.StartNotify()
         self.app.start()
 
-def writeBytes(file, value = 255):
+def writeBytes(file, value = 65535):
     f = None
     try:
         f = open(file, "wb+")
-        f.write(struct.pack('B', value))
+        f.write(struct.pack('H', value))
     finally:
         if f is not None:
             f.close()
 
 def readBytesAsValue(file):
     b = readBytes(file)
-    return struct.unpack('B', b)
+    return struct.unpack('H', b)
 
 def readBytes(file):
     f = None

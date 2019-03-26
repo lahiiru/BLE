@@ -1,6 +1,7 @@
 # Standard modules
 import dbus
 import subprocess
+import os
 try:
     from gi.repository import GObject
 except ImportError:
@@ -115,17 +116,25 @@ def readBytes(file):
             f.close()
     return b
 
-if __name__ == '__main__':
-    dongles = adapter.list_adapters()
-    print('dongles available: ', dongles)
-    dongle = adapter.Adapter(dongles[0])
-    print('address: ', dongle.address)
-    print('name: ', dongle.name)
-    print('alias: ', dongle.alias)
-    print('powered: ', dongle.powered)
-    print('pairable: ', dongle.pairable)
-    print('pairable timeout: ', dongle.pairabletimeout)
-    print('discoverable: ', dongle.discoverable)
-    subprocess.call(['sudo','hciconfig','hci0','piscan'])
-    pi_cpu_monitor = ble()
-    pi_cpu_monitor.start_bt()
+def enable_ble():
+    print('enabling bluetooth')
+    try:
+        os.system('sudo systemctl restart bluetooth.service && sudo hciconfig hci0 up')
+    except Exception as e:
+        print(e)
+
+
+enable_ble()
+dongles = adapter.list_adapters()
+print('dongles available: ', dongles)
+dongle = adapter.Adapter(dongles[0])
+print('address: ', dongle.address)
+print('name: ', dongle.name)
+print('alias: ', dongle.alias)
+print('powered: ', dongle.powered)
+print('pairable: ', dongle.pairable)
+print('pairable timeout: ', dongle.pairabletimeout)
+print('discoverable: ', dongle.discoverable)
+subprocess.call(['sudo','hciconfig','hci0','piscan'])
+pi_cpu_monitor = ble()
+pi_cpu_monitor.start_bt()

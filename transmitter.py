@@ -2,6 +2,7 @@
 import dbus
 import subprocess
 import os
+import time
 try:
     from gi.repository import GObject
 except ImportError:
@@ -120,11 +121,11 @@ def readBytes(file):
 def enable_ble():
     print('enabling bluetooth')
     try:
-        os.system('sudo systemctl restart bluetooth.service && sudo hciconfig hci0 up')
+        os.system('sudo systemctl restart bluetooth.service && sudo hciconfig hci0 up && sudo hciconfig hci0 piscan')
     except Exception as e:
         print(e)
 
-
+time.sleep(10)
 enable_ble()
 dongles = adapter.list_adapters()
 print('dongles available: ', dongles)

@@ -119,6 +119,14 @@ namespace BeaconManager
             return Encoding.ASCII.GetBytes(managementFrame);
         }
 
+        public static int GetNewID()
+        {
+            int id = Properties.Settings.Default.lastID;
+            id = id + 1;
+            Properties.Settings.Default.lastID = id;
+            return id;
+        }
+
     }
 
     // Implements the manual sorting of items by columns.

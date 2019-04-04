@@ -1,6 +1,8 @@
 # Standard modules
 import dbus
 import subprocess
+import os
+import time
 import uuid, re
 try:
     from gi.repository import GObject
@@ -131,6 +133,7 @@ def enable_ble():
         print(e)
 
 if __name__ == '__main__':
+    time.sleep(10)
     dongles = adapter.list_adapters()
     print('id characteristic: ', DEV_IDS_CHRC)
     print('dongles available: ', dongles)

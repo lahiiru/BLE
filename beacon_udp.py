@@ -99,7 +99,7 @@ def read_data(address):
 def enable_ble():
     print('enabling bluetooth')
     try:
-        os.system('sudo systemctl start bluetooth.service && sudo hciconfig hci0 up')
+        os.system('sudo systemctl restart bluetooth.service && sudo hciconfig hci0 up')
     except Exception as e:
         print(e)
 

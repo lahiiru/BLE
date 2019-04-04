@@ -26,7 +26,7 @@ namespace BeaconManager
         {
             this.ipAddress = ipAddress;
             this.lastPing = DateTime.Now;
-            this.tempId = DateTime.Now.Ticks.ToString().Substring(10);
+            this.tempId = Program.GetNewID().ToString();
         }
 
         public override bool Equals(object obj)

@@ -1,6 +1,7 @@
 # Standard modules
 import dbus
 import subprocess
+import uuid, re
 try:
     from gi.repository import GObject
 except ImportError:
@@ -11,12 +12,17 @@ from bluezero import adapter
 from bluezero import advertisement
 from bluezero import localGATT
 from bluezero import GATT
-import struct
+import struct, os
 
 # constants
-MY_SRVC = '12341000-1234-1234-1234-123456789abc'
-DEV_IDS_CHRC = '6E400003-B5A3-F393-E0A9-E50E24DCCA9A'
+MY_SRVC = '12341000-1234-1234-1234-123456789abb'
+DEV_IDS_CHRC = '6E400003-B5A3-F393-E0A9-#MAC'
 DEV_ATTR_CHRC = '6E400003-B5A3-F393-E0A9-E50E24DCCA9B'
+
+def get_wifi_mac(no_colon = False):
+    return [':',''][no_colon].join(re.findall('..', '%012x' % uuid.getnode())).upper()
+
+DEV_IDS_CHRC = DEV_IDS_CHRC.replace('#MAC', get_wifi_mac(True))
 
 def getByteArrayFromString(string):
     return getByteArrayFromBytes(string.encode('utf-8'))
@@ -86,6 +92,7 @@ class ble:
         if not self.dongle.powered:
             self.dongle.powered = True
         ad_manager = advertisement.AdvertisingManager(self.dongle.address)
+        ad_manager.unregister_advertisement(advert)
         ad_manager.register_advertisement(advert, {})
 
     def start_bt(self):
@@ -116,8 +123,16 @@ def readBytes(file):
             f.close()
     return b
 
+def enable_ble():
+    print('enabling bluetooth')
+    try:
+        os.system('sudo systemctl start bluetooth.service && sudo hciconfig hci0 up')
+    except Exception as e:
+        print(e)
+
 if __name__ == '__main__':
     dongles = adapter.list_adapters()
+    print('id characteristic: ', DEV_IDS_CHRC)
     print('dongles available: ', dongles)
     dongle = adapter.Adapter(dongles[0])
     print('address: ', dongle.address)
@@ -127,6 +142,7 @@ if __name__ == '__main__':
     print('pairable: ', dongle.pairable)
     print('pairable timeout: ', dongle.pairabletimeout)
     print('discoverable: ', dongle.discoverable)
+    enable_ble()
     subprocess.call(['sudo','hciconfig','hci0','piscan'])
     pi_cpu_monitor = ble()
     pi_cpu_monitor.start_bt()

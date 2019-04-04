@@ -33,8 +33,8 @@ devices = set()
 global_devices = set()
 devices_to_update = set()
 devices_info = dict()
-SVC_UUID = "12341000-1234-1234-1234-123456789abc"
-DEV_IDS_CHR = "6E400003-B5A3-F393-E0A9-E50E24DCCA9A"
+SVC_UUID = "12341000-1234-1234-1234-123456789abb"
+DEV_IDS_CHR = "6E400003-B5A3-F393-E0A9-#MAC"
 DEV_ATTR_CHRC = '6E400003-B5A3-F393-E0A9-E50E24DCCA9B'
 
 class ScanDelegate(DefaultDelegate):
@@ -45,12 +45,13 @@ class ScanDelegate(DefaultDelegate):
         if isNewDev:
             print("Discovered device", dev.addr)
         elif isNewData:
-            print("Received new data from", dev.addr)
+            print("Received new data from", dev.addr, dev.getScanData())
+
+scanner = Scanner().withDelegate(ScanDelegate())
 
 def scan():
     devices_set = set()
-    scanner = Scanner().withDelegate(ScanDelegate())
-    devices = scanner.scan(10.0)
+    devices = scanner.scan(10.0, True)
     for dev in devices:
         for (adtype, desc, value) in dev.getScanData():
             if value == SVC_UUID:
@@ -71,13 +72,16 @@ def read_data(address):
     while tries > 0:
         try:
             tries -= 1
+            DEV_IDS_CHR_REMOTE = ""
             dev = btle.Peripheral(address)
             service = dev.getServiceByUUID(btle.UUID(SVC_UUID))
             for svc in dev.services:
                 print(str(svc))
             for ch in service.getCharacteristics():
+                if str(ch).count(DEV_IDS_CHR.replace('#MAC','')) > 0:
+                    DEV_IDS_CHR_REMOTE = str(ch)
                 print(str(ch))
-            idsChrc = service.getCharacteristics(btle.UUID(DEV_IDS_CHR))[0]
+            idsChrc = service.getCharacteristics(btle.UUID(DEV_IDS_CHR_REMOTE))[0]
             attrChrc = service.getCharacteristics(btle.UUID(DEV_ATTR_CHRC))[0]
             idsBytes = idsChrc.read()
             attrBytes = attrChrc.read()
@@ -226,15 +230,15 @@ def process_management_link():
         node_id,
         get_uptime_minutes(),
         get_battery(),
-        get_bluetooth_mac(),
+        get_wifi_mac(),
         json.dumps(devices_info)
     )
     send(frame)
     print("Sent data: " + frame)
 
 
-def get_bluetooth_mac():
-    return ':'.join(re.findall('..', '%012x' % uuid.getnode())).upper()
+def get_wifi_mac(no_colon = False):
+    return [':',''][no_colon].join(re.findall('..', '%012x' % uuid.getnode())).upper()
 
 
 sleep(10)  # wait device to initialize wireless modules

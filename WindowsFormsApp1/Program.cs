@@ -97,7 +97,13 @@ namespace BeaconManager
             string[] tokens = stringFrame.Split('`'); // comming data seperated by :
             node.lastPing = DateTime.Now;
             node.status = tokens[0];
-            node.id = tokens[1];
+            if ("pending-set".Equals(node.id) && node.tempId != tokens[1])
+            {
+
+            }
+            else {
+                node.id = tokens[1];
+            }
             node.upTimeMinutes = int.Parse(tokens[2]);
             node.batteryLevel = int.Parse(tokens[3]);
             node.macAddress = tokens[4];
@@ -113,7 +119,7 @@ namespace BeaconManager
         /// <returns></returns>
         private static byte[] BuildManagementFrame(string ip, BeaconNode node) {
             string managementFrame = "OK";
-            if (node.id == "not-set") { // if client id is in not-set status, we need to tell an id
+            if ("not-set".Equals(node.id) || "pending-set".Equals(node.id)) { // if client id is in not-set status, we need to tell an id
                 managementFrame = "ID:" + node.tempId;
             }
             return Encoding.ASCII.GetBytes(managementFrame);

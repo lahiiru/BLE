@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Windows.Forms;
+using Microsoft.VisualBasic;
 
 namespace BeaconManager
 {
@@ -65,6 +66,23 @@ namespace BeaconManager
 
         }
 
+        private void listView1_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                if (listView1.FocusedItem.Bounds.Contains(e.Location))
+                {
+                    string currId = listView1.FocusedItem.SubItems[1].Text;
+                    if (Program.nodes.ContainsKey(currId)) {
+                        BeaconNode node = Program.nodes[currId];
+                        string id = Interaction.InputBox("Enter new ID for " + node.macAddress, "Change ID", node.id, -1, -1);
+                        node.id = "pending-set";
+                        node.tempId = id;
+                    }
+                }
+            }
+        }
+
         public TextBox LogBox
         {
             get { return textBox1; }
@@ -109,6 +127,11 @@ namespace BeaconManager
                 }
             }
             listView1.EndUpdate();
+        }
+
+        private void contextMenuStrip1_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+
         }
     }
 }

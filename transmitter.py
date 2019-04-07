@@ -121,7 +121,7 @@ def readBytes(file):
 def enable_ble():
     print('enabling bluetooth')
     try:
-        os.system('sudo systemctl restart bluetooth.service && sudo hciconfig hci0 up && sudo hciconfig hci0 piscan')
+        os.system('sudo systemctl start bluetooth.service && sudo hciconfig hci0 up && sudo hciconfig hci0 piscan && sudo hciconfig hci0 leadv')
     except Exception as e:
         print(e)
 

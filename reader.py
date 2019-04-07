@@ -1,17 +1,20 @@
+MY_SRVC = '12341000-1234-1234-1234-123456789abc'
+DEV_IDS_CHRC = '6E400003-B5A3-F393-E0A9-E50E24DCCA9A'
+DEV_ATTR_CHRC = '6E400003-B5A3-F393-E0A9-E50E24DCCA9B'
+
+KALI = '34:E1:2D:B7:31:F2' # Kali
+RPI = 'B8:27:EB:86:40:31' # RPi
+
+
 from time import sleep
 from bluezero import central
 
-SERVICE_UUID = '12341000-1234-1234-1234-123456789abc'
-CHARAC_UUD = '6E400003-B5A3-F393-E0A9-E50E24DCCA9A'
-DEVICE_ADDR = 'B8:27:EB:E9:56:52'
-ADAPTER_ADDR = 'B8:27:EB:86:40:31'
-
 class MyPeripheralDevice:
-    def __init__(self, device_addr, adapter_addr=None):
+    def __init__(self, device_addr, adapter_addr=KALI):
         self.remote_device = central.Central(adapter_addr=adapter_addr,
                                              device_addr=device_addr)
-        self._remote_charac = self.remote_device.add_characteristic(SERVICE_UUID,
-                                                                    CHARAC_UUD)
+        self._remote_charac = self.remote_device.add_characteristic(MY_SRVC,
+                                                                    DEV_IDS_CHRC)
 
     def connect(self):
         self.remote_device.connect()
@@ -26,17 +29,10 @@ class MyPeripheralDevice:
     def value(self):
         return self._remote_charac.value
 
-    def subscribe(self, user_callback):
-        self._remote_charac.add_characteristic_cb(user_callback)
-        self._remote_charac.start_notify()
-
-    def run_async(self):
-        self.remote_device.run()
-
 
 if __name__ == '__main__':
-    my_dev = MyPeripheralDevice(adapter_addr=ADAPTER_ADDR,
-                                device_addr=DEVICE_ADDR)
+    my_dev = MyPeripheralDevice(RPI)
+
     my_dev.connect()
-    my_dev.subscribe(print)
-    my_dev.run_async()
+    print(my_dev.value)
+    my_dev.disconnect()

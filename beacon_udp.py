@@ -1,13 +1,14 @@
-import socket
-from time import sleep
 from uptime import uptime
-import os
+from time import sleep
+from bluezero import central
 import re, uuid
 from bluetooth import *
-from bluepy import btle
 import struct
 from bluepy.btle import Scanner, DefaultDelegate
 import json
+import socket
+from bluezero import adapter
+
 
 # if you are setting up from the scratch. please use follwoing commands.
 # install dependencies
@@ -22,7 +23,6 @@ import json
     BEACON NODE SCRIPT
 """
 
-
 SERVER_ADD = '192.168.8.102'  # ip address of the machine where management app runs
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # udp client to send data to management app
 sock.settimeout(5)  # if server doesn't respond withing 5 sec, ignore
@@ -33,9 +33,25 @@ devices = set()
 global_devices = set()
 devices_to_update = set()
 devices_info = dict()
-SVC_UUID = "12341000-1234-1234-1234-123456789abb"
-DEV_IDS_CHR = "6E400003-B5A3-F393-E0A9-#MAC"
+SVC_UUID = "12341000-1234-1234-1234-123456789abc"
+DEV_IDS_CHR = "6E400003-B5A3-F393-E0A9-E50E24DCCA9A"
 DEV_ATTR_CHRC = '6E400003-B5A3-F393-E0A9-E50E24DCCA9B'
+
+def enable_ble():
+    print('enabling bluetooth')
+    try:
+        os.system('sudo systemctl restart bluetooth.service && sudo hciconfig hci0 up')
+    except Exception as e:
+        print(e)
+
+sleep(10)  # wait device to initialize wireless modules
+enable_ble()
+sleep(2)
+dongles = adapter.list_adapters()
+print('dongles available: ', dongles)
+dongle = adapter.Adapter(dongles[0])
+SELF = dongle.address
+print('address: ', SELF)
 
 class ScanDelegate(DefaultDelegate):
     def __init__(self):
@@ -65,6 +81,31 @@ def scan():
     return devices_set
 
 
+class MyPeripheralDevice:
+    def __init__(self, device_addr, adapter_addr=SELF):
+        self.remote_device = central.Central(adapter_addr=adapter_addr,
+                                             device_addr=device_addr)
+        self._id_char = self.remote_device.add_characteristic(SVC_UUID, DEV_IDS_CHR)
+        self._attr_char = self.remote_device.add_characteristic(SVC_UUID, DEV_ATTR_CHRC)
+
+    def connect(self):
+        self.remote_device.connect()
+        while not self.remote_device.services_resolved:
+            sleep(0.5)
+        self.remote_device.load_gatt()
+
+    def disconnect(self):
+        self.remote_device.disconnect()
+
+    @property
+    def id(self):
+        return self._id_char.value
+
+    @property
+    def attr(self):
+        return self._attr_char.value
+
+
 def read_data(address):
     print("Connecting to", address)
     data = ''
@@ -72,36 +113,21 @@ def read_data(address):
     while tries > 0:
         try:
             tries -= 1
-            DEV_IDS_CHR_REMOTE = ""
-            dev = btle.Peripheral(address)
-            service = dev.getServiceByUUID(btle.UUID(SVC_UUID))
-            for svc in dev.services:
-                print(str(svc))
-            for ch in service.getCharacteristics():
-                if str(ch).count(DEV_IDS_CHR.replace('#MAC','')) > 0:
-                    DEV_IDS_CHR_REMOTE = str(ch)
-                print(str(ch))
-            idsChrc = service.getCharacteristics(btle.UUID(DEV_IDS_CHR_REMOTE))[0]
-            attrChrc = service.getCharacteristics(btle.UUID(DEV_ATTR_CHRC))[0]
-            idsBytes = idsChrc.read()
-            attrBytes = attrChrc.read()
-            ids = bytes(idsBytes)
-            attrs = bytes(attrBytes).decode('utf-8')
-            print("ids, attrs", ids, attrs)
-            devices_info.get(address)["id"] = struct.unpack('H', ids)
-            devices_info.get(address)["attr"] = attrs
+            my_dev = MyPeripheralDevice(address)
+
+            my_dev.connect()
+            ids = my_dev.id
+            attrs = my_dev.attr
+            my_dev.disconnect()
+
+            # print("ids, attrs", ids, attrs)
+            devices_info.get(address)["id"] = struct.unpack('H', bytes(ids))
+            devices_info.get(address)["attr"] = bytes(attrs).decode()
             print(json.dumps(devices_info))
             break
         except Exception as e:
             print(e)
     return data
-
-def enable_ble():
-    print('enabling bluetooth')
-    try:
-        os.system('sudo systemctl restart bluetooth.service && sudo hciconfig hci0 up')
-    except Exception as e:
-        print(e)
 
 
 def connect():
@@ -230,20 +256,16 @@ def process_management_link():
         node_id,
         get_uptime_minutes(),
         get_battery(),
-        get_wifi_mac(),
+        SELF,
         json.dumps(devices_info)
     )
     send(frame)
     print("Sent data: " + frame)
 
 
-def get_wifi_mac(no_colon = False):
-    return [':',''][no_colon].join(re.findall('..', '%012x' % uuid.getnode())).upper()
+def get_bluetooth_mac():
+    return ':'.join(re.findall('..', '%012x' % uuid.getnode())).upper()
 
-
-sleep(10)  # wait device to initialize wireless modules
-enable_ble()
-sleep(2)
 
 i = 0
 while True:  # repeatedly send status/ping messages

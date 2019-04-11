@@ -186,9 +186,9 @@ def handle_ack(data):
     dat = d[3:]  # rest of them are data
     print(hed, dat)
     if hed == "ID":  # asked to set ID
-        print("Asked to change ID to "+dat)
         node_id = dat
         writeBytes('id', int(dat))
+        print("Asked to change ID to "+dat)
 
 
 def get_uptime_minutes():

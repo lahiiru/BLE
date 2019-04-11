@@ -53,6 +53,15 @@ dongle = adapter.Adapter(dongles[0])
 SELF = dongle.address
 print('address: ', SELF)
 
+def writeBytes(file, value = 65535):
+    f = None
+    try:
+        f = open(file, "wb+")
+        f.write(struct.pack('H', value))
+    finally:
+        if f is not None:
+            f.close()
+
 class ScanDelegate(DefaultDelegate):
     def __init__(self):
         DefaultDelegate.__init__(self)
@@ -120,7 +129,7 @@ def read_data(address):
             attrs = my_dev.attr
             my_dev.disconnect()
 
-            # print("ids, attrs", ids, attrs)
+            print("ids", bytes(ids))
             devices_info.get(address)["id"] = struct.unpack('H', bytes(ids))
             devices_info.get(address)["attr"] = bytes(attrs).decode()
             print(json.dumps(devices_info))
@@ -179,6 +188,7 @@ def handle_ack(data):
     if hed == "ID":  # asked to set ID
         print("Asked to change ID to "+dat)
         node_id = dat
+        writeBytes('id', int(dat))
 
 
 def get_uptime_minutes():
@@ -220,8 +230,8 @@ def process_scatter_link():
                     devices_to_update.remove(addr)
                 devices_modified = True
 
-    if devices_modified: # need to notify to all devices
-        devices_to_update = devices_to_update.union(devices)
+    #if devices_modified: # need to notify to all devices
+    devices_to_update = devices_to_update.union(devices)
 
     if len(devices_to_update) > 0:
         update_message = "%sEOD" % devices
@@ -273,5 +283,5 @@ while True:  # repeatedly send status/ping messages
     if i % 2 == 0:
         process_management_link()
     process_scatter_link()
-    sleep(10)  # should be > 60 sec wait in production
+    sleep(2)  # should be > 60 sec wait in production
     i += 1

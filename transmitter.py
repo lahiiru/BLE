@@ -38,9 +38,9 @@ class DeviceIDsChrc(localGATT.Characteristic):
                                           ['read'])
 
     def ReadValue(self, options):
-        print("A device is reading ID profile")
         bs = readBytes('id')
         array = getByteArrayFromBytes(bs)
+        print("A device is reading ID profile. Returning", bs)
         return dbus.Array(array)
 
 

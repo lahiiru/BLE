@@ -45,7 +45,7 @@ bluetoothd[17773]: Endpoint registered: sender=:1.32 path=/A2DP/SBC/Sink/1
 `git clone https://github.com/ukBaz/python-bluezero.git`    
 `sudo cp python-bluezero/examples/ukBaz.bluezero.conf /etc/dbus-1/system.d/. && sudo systemctl daemon-reload && sudo service bluetooth restart`   
 
-1. Python-pip dependenices
+1. Python-pip dependenices   
 `sudo pip3 install bluezero`   
 `sudo pip3 install uptime`   
 

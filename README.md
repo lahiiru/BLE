@@ -48,6 +48,7 @@ bluetoothd[17773]: Endpoint registered: sender=:1.32 path=/A2DP/SBC/Sink/1
 1. Python-pip dependenices   
 `sudo pip3 install bluezero`   
 `sudo pip3 install uptime`   
+`sudo pip3 install pybluez`   
 
 1. Schedule running `transmitter.py` at start. Add follwing line to `crontab`  
 `crontab -e`   

@@ -7,7 +7,8 @@
 `sudo apt-get install bluez-tools`  
 `sudo apt-get install bluez-test-scripts`  
 `sudo apt-get install bluez-hcidump`  
-`sudo apt-get install python-bluez`  
+`sudo apt-get install python-bluez` 
+`sudo apt-get install pulseaudio-module-bluetooth`   
 
 1. Enable experimental bluetooth features by adding *--experimental* flag to following file as below.  
 `sudo nano /lib/systemd/system/bluetooth.service`  

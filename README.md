@@ -1,4 +1,5 @@
 1. Clone the repo and do an apt update  
+`sudo apt-get install git`   
 `git clone https://github.com/lahiiru/BLE.git`  
 `sudo apt-get update`  
 

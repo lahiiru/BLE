@@ -4,7 +4,7 @@
 `git clone https://github.com/lahiiru/BLE.git`  
 
 1. Install dependancies  
-`sudo apt-get install bluetooth bluez-tools bluez-test-scripts bluez-hcidump python-bluez -y`  
+`sudo apt-get install python3-pip bluetooth bluez-tools bluez-test-scripts bluez-hcidump python-bluez -y`  
 
 1. Enable experimental bluetooth features by adding *--experimental* flag to following file as below.  
 `sudo nano /lib/systemd/system/bluetooth.service`  

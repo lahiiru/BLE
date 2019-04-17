@@ -1,7 +1,7 @@
 1. Clone the repo and do an apt update  
+`sudo apt-get update`  
 `sudo apt-get install git`   
 `git clone https://github.com/lahiiru/BLE.git`  
-`sudo apt-get update`  
 
 1. Install dependancies  
 `sudo apt-get install bluetooth`  

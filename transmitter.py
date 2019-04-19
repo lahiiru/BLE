@@ -14,12 +14,11 @@ from bluezero import adapter
 from bluezero import advertisement
 from bluezero import localGATT
 from bluezero import GATT
+from config import DEV_ATTR_CHRC, DEV_IDS_CHRC, SVC_UUID
 import struct
 
 # constants
-MY_SRVC = '12341000-1234-1234-1234-123456789abc'
-DEV_IDS_CHRC = '6E400003-B5A3-F393-E0A9-E50E24DCCA9A'
-DEV_ATTR_CHRC = '6E400003-B5A3-F393-E0A9-E50E24DCCA9B'
+
 
 logging.basicConfig(filename='transmitter.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s',
                     level=logging.DEBUG)
@@ -45,10 +44,15 @@ class DeviceIDsChrc(localGATT.Characteristic):
                                           ['read'])
 
     def ReadValue(self, options):
-        bs = readBytes('id')
-        array = getByteArrayFromBytes(bs)
-        logging.info("A device is reading ID profile. Returning %s", bs)
-        return dbus.Array(array)
+        try:
+            logging.info("A device is reading ID profile.")
+            bs = readBytes('/home/pi/id')
+            array = getByteArrayFromBytes(bs)
+            logging.info("Returning %s", bs)
+            return dbus.Array(array)
+        except Exception as e:
+            logging.error(e)
+            return dbus.Array([])
 
 
 class DeviceAttrChrc(localGATT.Characteristic):
@@ -71,7 +75,7 @@ class ble:
     def __init__(self):
         self.bus = dbus.SystemBus()
         self.app = localGATT.Application()
-        self.srv = localGATT.Service(1, MY_SRVC, True)
+        self.srv = localGATT.Service(1, SVC_UUID, True)
 
         self.idsCharc = DeviceIDsChrc(self.srv)
         self.attrCharc = DeviceAttrChrc(self.srv)
@@ -89,7 +93,7 @@ class ble:
         self.dongle = adapter.Adapter(adapter.list_adapters()[0])
         advert = advertisement.Advertisement(1, 'peripheral')
 
-        advert.service_UUIDs = [MY_SRVC]
+        advert.service_UUIDs = [SVC_UUID]
         # eddystone_data = tools.url_to_advert(WEB_BLINKT, 0x10, TX_POWER)
         # advert.service_data = {EDDYSTONE: eddystone_data}
         if not self.dongle.powered:

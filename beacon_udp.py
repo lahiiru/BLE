@@ -8,6 +8,8 @@ from bluepy.btle import Scanner, DefaultDelegate
 import json
 import socket
 from bluezero import adapter
+from config import DEV_ATTR_CHRC, DEV_IDS_CHRC, SVC_UUID, SERVER_ADD
+
 
 # if you are setting up from the scratch. please use follwoing commands.
 # install dependencies
@@ -23,7 +25,6 @@ from bluezero import adapter
 """
 
 
-SERVER_ADD = '192.168.8.102'  # ip address of the machine where management app runs
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # udp client to send data to management app
 sock.settimeout(5)  # if server doesn't respond withing 5 sec, ignore
 server_address = (SERVER_ADD, 9091)
@@ -32,9 +33,7 @@ devices = set()
 global_devices = set()
 devices_to_update = set()
 devices_info = dict()
-SVC_UUID = "12341000-1234-1234-1234-123456789abc"
-DEV_IDS_CHR = "6E400003-B5A3-F393-E0A9-E50E24DCCA9A"
-DEV_ATTR_CHRC = '6E400003-B5A3-F393-E0A9-E50E24DCCA9B'
+
 last_dev_info = ''
 
 
@@ -100,7 +99,7 @@ class MyPeripheralDevice:
     def __init__(self, device_addr, adapter_addr=SELF):
         self.remote_device = central.Central(adapter_addr=adapter_addr,
                                              device_addr=device_addr)
-        self._id_char = self.remote_device.add_characteristic(SVC_UUID, DEV_IDS_CHR)
+        self._id_char = self.remote_device.add_characteristic(SVC_UUID, DEV_IDS_CHRC)
         self._attr_char = self.remote_device.add_characteristic(SVC_UUID, DEV_ATTR_CHRC)
 
     def connect(self):
@@ -193,7 +192,7 @@ def handle_ack(data):
     print(hed, dat)
     if hed == "ID":  # asked to set ID
         node_id = dat
-        writeBytes('id', int(dat))
+        writeBytes('/home/pi/id', int(dat))
         print("Asked to change ID to "+dat)
 
 

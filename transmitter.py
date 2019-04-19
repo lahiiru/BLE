@@ -2,6 +2,7 @@
 import dbus
 import subprocess
 import os
+import logging
 import time
 try:
     from gi.repository import GObject
@@ -19,6 +20,12 @@ import struct
 MY_SRVC = '12341000-1234-1234-1234-123456789abc'
 DEV_IDS_CHRC = '6E400003-B5A3-F393-E0A9-E50E24DCCA9A'
 DEV_ATTR_CHRC = '6E400003-B5A3-F393-E0A9-E50E24DCCA9B'
+
+logging.basicConfig(filename='transmitter.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s',
+                    level=logging.DEBUG)
+
+logging.info('Starting transmitter...')
+
 
 def getByteArrayFromString(string):
     return getByteArrayFromBytes(string.encode('utf-8'))
@@ -40,7 +47,7 @@ class DeviceIDsChrc(localGATT.Characteristic):
     def ReadValue(self, options):
         bs = readBytes('id')
         array = getByteArrayFromBytes(bs)
-        print("A device is reading ID profile. Returning", bs)
+        logging.info("A device is reading ID profile. Returning %s", bs)
         return dbus.Array(array)
 
 
@@ -55,7 +62,7 @@ class DeviceAttrChrc(localGATT.Characteristic):
                                           ['read'])
 
     def ReadValue(self, options):
-        print("A device is reading attribute profile")
+        logging.info("A device is reading attribute profile")
         array = getByteArrayFromString("batt=20%")
         return dbus.Array(array)
 
@@ -119,24 +126,22 @@ def readBytes(file):
     return b
 
 def enable_ble():
-    print('enabling bluetooth')
+    logging.info('enabling bluetooth')
     try:
         os.system('sudo systemctl start bluetooth.service && sudo hciconfig hci0 up && sudo hciconfig hci0 piscan && sudo hciconfig hci0 leadv')
     except Exception as e:
-        print(e)
+        logging.info(e)
 
 time.sleep(10)
 enable_ble()
 dongles = adapter.list_adapters()
-print('dongles available: ', dongles)
 dongle = adapter.Adapter(dongles[0])
-print('address: ', dongle.address)
-print('name: ', dongle.name)
-print('alias: ', dongle.alias)
-print('powered: ', dongle.powered)
-print('pairable: ', dongle.pairable)
-print('pairable timeout: ', dongle.pairabletimeout)
-print('discoverable: ', dongle.discoverable)
-subprocess.call(['sudo','hciconfig','hci0','piscan'])
+logging.info('address: ' + dongle.address)
+logging.info('name: ' + dongle.name)
+logging.info('alias: ' + dongle.alias)
+logging.info('powered: %s', dongle.powered)
+logging.info('pairable: %s', dongle.pairable)
+logging.info('pairable timeout: %s', dongle.pairabletimeout)
+logging.info('discoverable: %s', dongle.discoverable)
 pi_cpu_monitor = ble()
 pi_cpu_monitor.start_bt()

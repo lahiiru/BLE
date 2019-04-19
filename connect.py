@@ -1,10 +1,5 @@
 from bluepy import btle
-import time
-import binascii
-
-from time import gmtime, strftime, sleep
 from bluepy.btle import Scanner, DefaultDelegate, BTLEException
-import sys
 
 SVC_UUID = "12341000-1234-1234-1234-123456789abc"
 DEV_IDS_CHR = "6E400003-B5A3-F393-E0A9-E50E24DCCA9A"
@@ -61,4 +56,4 @@ def read_data(address):
 
 
 scan()
-read_data("b8:27:eb:86:40:31")
+read_data("B8:27:EB:E8:82:9C")

@@ -2,15 +2,14 @@ MY_SRVC = '12341000-1234-1234-1234-123456789abc'
 DEV_IDS_CHRC = '6E400003-B5A3-F393-E0A9-E50E24DCCA9A'
 DEV_ATTR_CHRC = '6E400003-B5A3-F393-E0A9-E50E24DCCA9B'
 
-KALI = '34:E1:2D:B7:31:F2' # Kali
-RPI = 'B8:27:EB:86:40:31' # RPi
-
+R9C = 'B8:27:EB:E8:82:9C' # Kali
+R31 = 'B8:27:EB:86:40:31' # RPi
 
 from time import sleep
 from bluezero import central
 
 class MyPeripheralDevice:
-    def __init__(self, device_addr, adapter_addr=KALI):
+    def __init__(self, device_addr, adapter_addr):
         self.remote_device = central.Central(adapter_addr=adapter_addr,
                                              device_addr=device_addr)
         self._remote_charac = self.remote_device.add_characteristic(MY_SRVC,
@@ -31,7 +30,7 @@ class MyPeripheralDevice:
 
 
 if __name__ == '__main__':
-    my_dev = MyPeripheralDevice(RPI)
+    my_dev = MyPeripheralDevice(R9C, R31)
 
     my_dev.connect()
     print(my_dev.value)

@@ -9,7 +9,7 @@ import json
 import socket
 from bluezero import adapter
 from config import DEV_ATTR_CHRC, DEV_IDS_CHRC, SVC_UUID, SERVER_ADD
-
+import os, logging
 
 # if you are setting up from the scratch. please use follwoing commands.
 # install dependencies
@@ -24,6 +24,10 @@ from config import DEV_ATTR_CHRC, DEV_IDS_CHRC, SVC_UUID, SERVER_ADD
     BEACON NODE SCRIPT
 """
 
+logging.basicConfig(filename='transmitter.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s',
+                    level=logging.DEBUG)
+
+logging.info('Starting beacon node script...')
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # udp client to send data to management app
 sock.settimeout(5)  # if server doesn't respond withing 5 sec, ignore
@@ -38,21 +42,21 @@ last_dev_info = ''
 
 
 def enable_ble():
-    print('enabling bluetooth')
+    logging.info('enabling bluetooth')
     try:
         os.system('sudo systemctl restart bluetooth.service && sudo hciconfig hci0 up')
     except Exception as e:
-        print(e)
+        logging.error(e)
 
-
+logging.info(os.getpid())
 sleep(10)  # wait device to initialize wireless modules
 enable_ble()
 sleep(2)
 dongles = adapter.list_adapters()
-print('dongles available: ', dongles)
+logging.info('dongles available: %s', dongles)
 dongle = adapter.Adapter(dongles[0])
 SELF = dongle.address
-print('address: ', SELF)
+logging.info('address: %s', SELF)
 
 
 def writeBytes(file, value = 65535):
@@ -71,9 +75,9 @@ class ScanDelegate(DefaultDelegate):
 
     def handleDiscovery(self, dev, isNewDev, isNewData):
         if isNewDev:
-            print("Discovered device", dev.addr)
+            logging.info("Discovered device %s", dev.addr)
         elif isNewData:
-            print("Received new data from", dev.addr, dev.getScanData())
+            logging.info("Received new data from %s", dev.addr, dev.getScanData())
 
 
 scanner = Scanner().withDelegate(ScanDelegate())
@@ -85,12 +89,12 @@ def scan():
     for dev in all_dev:
         for (adtype, desc, value) in dev.getScanData():
             if value == SVC_UUID:
-                print("Device %s (%s), RSSI=%d dB" % (dev.addr, dev.addrType, dev.rssi))
+                logging.info("Device %s (%s), RSSI=%d dB" % (dev.addr, dev.addrType, dev.rssi))
                 obj = devices_info.get(dev.addr)
                 if obj is None:
                     devices_info[dev.addr] = {}
                 devices_info.get(dev.addr)["rssi"] = dev.rssi
-                print("  %s = %s" % (desc, value))
+                logging.info("  %s = %s" % (desc, value))
                 devices_set.add(dev.addr)
     return devices_set
 
@@ -121,7 +125,7 @@ class MyPeripheralDevice:
 
 
 def read_data(address):
-    print("Reading data from", address)
+    logging.info("Reading data from %s", address)
     data = ''
     tries = 5
     while tries > 0:
@@ -134,13 +138,13 @@ def read_data(address):
             attrs = my_dev.attr
             my_dev.disconnect()
 
-            print("ids", bytes(ids))
+            logging.info("ids %s", bytes(ids))
             devices_info.get(address)["id"] = struct.unpack('H', bytes(ids))
             devices_info.get(address)["attr"] = bytes(attrs).decode()
-            print(json.dumps(devices_info))
+            logging.info(json.dumps(devices_info))
             break
         except Exception as e:
-            print(e)
+            logging.error(e)
     return data
 
 
@@ -153,11 +157,11 @@ def connect():
     while not connected:
         try:
             # Connect the socket to the port where the server is listening
-            print('Connecting management app on {}:{}'.format(*server_address))
+            logging.info('Connecting management app on {}:{}'.format(*server_address))
             sock.connect(server_address)
             connected = True
         except Exception as e:
-            print(e)
+            logging.error(e)
             sleep(10)  # should be > 60 sec wait in production
 
 
@@ -175,7 +179,7 @@ def send(message_str):
         # process server response
         handle_ack(data)
     except Exception as e:
-        print(e)
+        logging.error(e)
         sleep(10)
 
 
@@ -189,11 +193,11 @@ def handle_ack(data):
     global node_id
     hed = d[:2]  # first part of the message indicates the message type
     dat = d[3:]  # rest of them are data
-    print(hed, dat)
+    logging.info('HED %s, DAT %s', hed, dat)
     if hed == "ID":  # asked to set ID
         node_id = dat
         writeBytes('/home/pi/id', int(dat))
-        print("Asked to change ID to "+dat)
+        logging.info("Asked to change ID to %s", dat)
 
 
 def get_uptime_minutes():
@@ -213,14 +217,14 @@ def get_battery():
 
 
 def process_scatter_link():
-    print("\n\nPerforming inquiry...")
+    logging.info("\n\nPerforming inquiry...")
     new_devices = scan()
-    print('Discovered device list', new_devices)
+    logging.info('Discovered device list %s', new_devices)
     for addr in new_devices.copy():
         try:
             read_data(addr)
         except Exception as e:
-            print(e)
+            logging.error(e)
 
 
 def process_management_link():
@@ -235,12 +239,12 @@ def process_management_link():
             SELF,
             new_dev_info
         )
-        print('Connecting to management app...')
+        logging.info('Connecting to management app...')
         connect()  # ensure the connectivity
         send(frame)
-        print("Sent update: " + frame)
+        logging.info("Sent update: %s", frame)
     else:
-        print("No update to send")
+        logging.info("No update to send")
 
 
 def get_bluetooth_mac():

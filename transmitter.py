@@ -13,7 +13,7 @@ except ImportError:
 from bluezero import adapter
 from bluezero import advertisement
 from bluezero import localGATT
-from bluezero import GATT
+from bluezero import GATT, constants
 from config import DEV_ATTR_CHRC, DEV_IDS_CHRC, SVC_UUID
 import struct
 
@@ -41,7 +41,7 @@ class DeviceIDsChrc(localGATT.Characteristic):
                                           service,
                                           [dbus.Byte("0".encode('utf-8'))],
                                           False,
-                                          ['read'])
+                                          ['read', 'notify'])
 
     def ReadValue(self, options):
         try:
@@ -63,12 +63,49 @@ class DeviceAttrChrc(localGATT.Characteristic):
                                           service,
                                           [dbus.Byte("1".encode('utf-8'))],
                                           False,
-                                          ['read'])
+                                          ['read', 'notify'])
 
     def ReadValue(self, options):
         logging.info("A device is reading attribute profile")
         array = getByteArrayFromString("batt=20%")
         return dbus.Array(array)
+
+    def StartNotify(self):
+        if self.props[constants.GATT_CHRC_IFACE]['Notifying']:
+            logging.info('Already notifying, nothing to do')
+            return
+        logging.info('Notifying on')
+        self.props[constants.GATT_CHRC_IFACE]['Notifying'] = True
+        self._update_temp_value()
+
+    def StopNotify(self):
+        if not self.props[constants.GATT_CHRC_IFACE]['Notifying']:
+            logging.info('Not notifying, nothing to do')
+            return
+
+        logging.info('Notifying off')
+        self.props[constants.GATT_CHRC_IFACE]['Notifying'] = False
+        self._update_temp_value()
+
+    def _update_temp_value(self):
+        if not self.props[constants.GATT_CHRC_IFACE]['Notifying']:
+            return
+
+        logging.info('Starting timer event')
+        GObject.timeout_add(2000, self.temperature_cb)
+
+    def temperature_cb(self):
+        reading = [5]
+        logging.info('Getting new temperature',
+              reading,
+              self.props[constants.GATT_CHRC_IFACE]['Notifying'])
+        self.props[constants.GATT_CHRC_IFACE]['Value'] = reading
+
+        self.PropertiesChanged(constants.GATT_CHRC_IFACE,
+                               {'Value': self.ReadValue({})},
+                               [])
+        logging.info('Array value: ', reading)
+        return self.props[constants.GATT_CHRC_IFACE]['Notifying']
 
 
 class ble:
@@ -102,7 +139,7 @@ class ble:
         ad_manager.register_advertisement(advert, {})
 
     def start_bt(self):
-        # self.light.StartNotify()
+        self.idsCharc.StartNotify()
         self.app.start()
 
 def writeBytes(file, value = 65535):

@@ -1,5 +1,5 @@
 from uptime import uptime
-from time import sleep
+from time import sleep, time
 from bluezero import central
 import re, uuid
 from bluetooth import *
@@ -8,7 +8,7 @@ from bluepy.btle import Scanner, DefaultDelegate
 import json
 import socket
 from bluezero import adapter
-from config import DEV_ATTR_CHRC, DEV_IDS_CHRC, SVC_UUID, SERVER_ADD
+from config import DEV_ATTR_CHRC, DEV_IDS_CHRC, SVC_UUID, SERVER_ADD, TIME_TO_PING
 import os, logging
 
 # if you are setting up from the scratch. please use follwoing commands.
@@ -24,7 +24,7 @@ import os, logging
     BEACON NODE SCRIPT
 """
 
-logging.basicConfig(filename='transmitter.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s',
+logging.basicConfig(filename='node.log', filemode='w', format='%(lineno)d %(funcName)s %(filename)s - %(levelname)s - %(message)s',
                     level=logging.DEBUG)
 
 logging.info('Starting beacon node script...')
@@ -37,6 +37,7 @@ devices = set()
 global_devices = set()
 devices_to_update = set()
 devices_info = dict()
+last_ping = time()
 
 last_dev_info = ''
 
@@ -49,8 +50,8 @@ def enable_ble():
         logging.error(e)
 
 logging.info(os.getpid())
-sleep(10)  # wait device to initialize wireless modules
-enable_ble()
+# sleep(10)  # wait device to initialize wireless modules
+# enable_ble()
 sleep(2)
 dongles = adapter.list_adapters()
 logging.info('dongles available: %s', dongles)
@@ -64,6 +65,8 @@ def writeBytes(file, value = 65535):
     try:
         f = open(file, "wb+")
         f.write(struct.pack('H', value))
+    except Exception as e:
+        logging.error(e)
     finally:
         if f is not None:
             f.close()
@@ -103,11 +106,17 @@ class MyPeripheralDevice:
     def __init__(self, device_addr, adapter_addr=SELF):
         self.remote_device = central.Central(adapter_addr=adapter_addr,
                                              device_addr=device_addr)
-        self._id_char = self.remote_device.add_characteristic(SVC_UUID, DEV_IDS_CHRC)
-        self._attr_char = self.remote_device.add_characteristic(SVC_UUID, DEV_ATTR_CHRC)
+        try:
+            self._id_char = self.remote_device.add_characteristic(SVC_UUID, DEV_IDS_CHRC)
+            self._attr_char = self.remote_device.add_characteristic(SVC_UUID, DEV_ATTR_CHRC)
+        except Exception as e:
+            logging.error(e)
 
     def connect(self):
-        self.remote_device.connect()
+        if not self.remote_device.connected:
+            self.remote_device.connect()
+        else:
+            logging.info('Already connected.')
         while not self.remote_device.services_resolved:
             sleep(0.5)
         self.remote_device.load_gatt()
@@ -123,12 +132,22 @@ class MyPeripheralDevice:
     def attr(self):
         return self._attr_char.value
 
+    def subscribe(self, user_callback):
+        self._id_char.add_characteristic_cb(user_callback)
+        self._id_char.start_notify()
+
+    def run_async(self):
+        self.remote_device.run()
+
+def callback(a, b, *args):
+    logging.info('callback %s %s', a, b)
 
 def read_data(address):
     logging.info("Reading data from %s", address)
     data = ''
     tries = 5
     while tries > 0:
+        my_dev = None
         try:
             tries -= 1
             my_dev = MyPeripheralDevice(address)
@@ -136,15 +155,27 @@ def read_data(address):
             my_dev.connect()
             ids = my_dev.id
             attrs = my_dev.attr
-            my_dev.disconnect()
+            if len(attrs) == 2:
+                ids, attrs = attrs, ids
+            logging.info('%s %s', ids, attrs)
 
+            '''
+            my_dev.subscribe(callback)
+            logging.info('entering to event loop')
+            my_dev.run_async()
+            logging.info('exiting from event loop')
+            '''
             logging.info("ids %s", bytes(ids))
+            logging.info("attrs %s", attrs)
             devices_info.get(address)["id"] = struct.unpack('H', bytes(ids))
             devices_info.get(address)["attr"] = bytes(attrs).decode()
             logging.info(json.dumps(devices_info))
             break
         except Exception as e:
-            logging.error(e)
+            logging.exception(e, exc_info=True)
+            if my_dev is not None:
+                my_dev.disconnect()
+
     return data
 
 
@@ -195,9 +226,9 @@ def handle_ack(data):
     dat = d[3:]  # rest of them are data
     logging.info('HED %s, DAT %s', hed, dat)
     if hed == "ID":  # asked to set ID
+        logging.info("Asked to change ID to %s", dat)
         node_id = dat
         writeBytes('/home/pi/id', int(dat))
-        logging.info("Asked to change ID to %s", dat)
 
 
 def get_uptime_minutes():
@@ -217,10 +248,12 @@ def get_battery():
 
 
 def process_scatter_link():
+    global devices_to_update
     logging.info("\n\nPerforming inquiry...")
     new_devices = scan()
     logging.info('Discovered device list %s', new_devices)
-    for addr in new_devices.copy():
+    devices_to_update = devices_to_update.union(new_devices)
+    for addr in devices_to_update.copy():
         try:
             read_data(addr)
         except Exception as e:
@@ -228,9 +261,9 @@ def process_scatter_link():
 
 
 def process_management_link():
-    global last_dev_info
+    global last_dev_info, last_ping, TIME_TO_PING
     new_dev_info = json.dumps(devices_info)
-    if last_dev_info != new_dev_info:
+    if time() > TIME_TO_PING + last_ping or last_dev_info != new_dev_info:
         last_dev_info = new_dev_info
         frame = 'OK`{}`{}`{}`{}`{}'.format(
             node_id,
@@ -242,6 +275,7 @@ def process_management_link():
         logging.info('Connecting to management app...')
         connect()  # ensure the connectivity
         send(frame)
+        last_ping = time()
         logging.info("Sent update: %s", frame)
     else:
         logging.info("No update to send")
@@ -252,6 +286,10 @@ def get_bluetooth_mac():
 
 
 while True:  # repeatedly send status/ping messages
-    process_management_link()
-    process_scatter_link()
-    sleep(2)  # should be > 60 sec wait in production
+    try:
+        process_management_link()
+        process_scatter_link()
+        sleep(2)  # should be > 60 sec wait in production
+    except Exception as e:
+        logging.error(e, exc_info=True)
+        sleep(10)

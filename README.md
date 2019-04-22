@@ -50,6 +50,7 @@ bluetoothd[17773]: Endpoint registered: sender=:1.32 path=/A2DP/SBC/Sink/1
 
 1. Schedule running `transmitter.py` at start. Add follwing line to `crontab`  
 `crontab -e`   
-   > @reboot sudo python3 /home/pi/BLE/transmitter.py
+   > @reboot sleep 20 && sudo python3 /home/pi/BLE/transmitter.py   
+   @reboot sleep 25 && sudo python3 /home/pi/BLE/beacon_udp.py
 1. Run [BeaconManager.exe](https://github.com/lahiiru/BLE/blob/master/WindowsFormsApp1/bin/Debug/BeaconManager.exe) in a Windows PC and IP of the this PC will be `SERVER_ADD`.  
-1. Change the `SERVER_ADD` in `beacon_udp.py` script and Run `sudo python3 /home/pi/BLE/beacon_udp.py` manually if you are in development/testing stage. Oherwise, you can schedule it too.
+1. Change the `SERVER_ADD` in `config.py` script and reboot.

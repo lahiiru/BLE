@@ -86,6 +86,15 @@ namespace BeaconManager
             newsock.Close();
         }
 
+        public static bool HasId(string id) {
+            foreach(BeaconNode node in nodes.Values) {
+                if (node.tempId == id || node.id == id) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         /// <summary>
         /// Extract information from data buffer and update fields in node object
         /// </summary>

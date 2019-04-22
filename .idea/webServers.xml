@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="8d9d6417-46af-4665-aa35-0a9dd991b81f" name="192.168.8.105" url="http://192.168.8.105">
+        <fileTransfer host="192.168.8.105" port="22" rootFolder="/home/pi/BLE/" accessType="SFTP">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" shareSSLContext="true" />
+          </advancedOptions>
+          <option name="port" value="22" />
+        </fileTransfer>
+      </webServer>
+      <webServer id="d57452b7-6ab4-4ede-9476-d1eb3bacd1c0" name="192.168.8.104" url="http://192.168.8.104">
+        <fileTransfer host="192.168.8.104" port="22" rootFolder="/home/pi/BLE/" accessType="SFTP">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" shareSSLContext="true" />
+          </advancedOptions>
+          <option name="port" value="22" />
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

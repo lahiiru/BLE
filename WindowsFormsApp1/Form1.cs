@@ -76,8 +76,14 @@ namespace BeaconManager
                     if (Program.nodes.ContainsKey(currId)) {
                         BeaconNode node = Program.nodes[currId];
                         string id = Interaction.InputBox("Enter new ID for " + node.macAddress, "Change ID", node.id, -1, -1);
-                        node.id = "pending-set";
-                        node.tempId = id;
+                        if (Program.HasId(id))
+                        {
+                            MessageBox.Show("ID " + id + " already exist!", "ID collision", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        }
+                        else {
+                            node.id = "pending-set";
+                            node.tempId = id;
+                        }
                     }
                 }
             }

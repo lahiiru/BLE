@@ -251,8 +251,8 @@ def process_scatter_link():
     global devices_to_update
     logging.info("\n\nPerforming inquiry...")
     new_devices = scan()
-    logging.info('Discovered device list %s', new_devices)
     devices_to_update = devices_to_update.union(new_devices)
+    logging.info('Discovered all device list %s', devices_to_update)
     for addr in devices_to_update.copy():
         try:
             read_data(addr)

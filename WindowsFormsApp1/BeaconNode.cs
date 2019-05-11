@@ -21,12 +21,13 @@ namespace BeaconManager
         // additional control variables
         public string tempId; // Holds newly created node ID. Until node picks it up.
         public bool fresh = true;
+        public bool offline = false;
 
         public BeaconNode(string ipAddress)
         {
             this.ipAddress = ipAddress;
             this.lastPing = DateTime.Now;
-            this.tempId = Program.GetNewID().ToString();
+            this.tempId = null;
         }
 
         public override bool Equals(object obj)

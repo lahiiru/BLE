@@ -49,6 +49,19 @@ def enable_ble():
     except Exception as e:
         logging.error(e)
 
+
+def readBytes(file):
+    f = None
+    b = b''
+    try:
+        f = open(file, "rb+")
+        b = f.read()
+    finally:
+        if f is not None:
+            f.close()
+    return b
+
+
 logging.info(os.getpid())
 # sleep(10)  # wait device to initialize wireless modules
 # enable_ble()
@@ -58,6 +71,16 @@ logging.info('dongles available: %s', dongles)
 dongle = adapter.Adapter(dongles[0])
 SELF = dongle.address
 logging.info('address: %s', SELF)
+
+try:
+    bs = readBytes('/home/pi/id')
+    node_id = str(struct.unpack('H', bs)[0])
+except Exception as e:
+    logging.error(e)
+
+node_id = "not-set"
+
+logging.info('node id: %s', node_id)
 
 
 def writeBytes(file, value = 65535):

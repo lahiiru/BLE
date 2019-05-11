@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
@@ -76,12 +77,16 @@ namespace BeaconManager
                     if (Program.nodes.ContainsKey(currId)) {
                         BeaconNode node = Program.nodes[currId];
                         string id = Interaction.InputBox("Enter new ID for " + node.macAddress, "Change ID", node.id, -1, -1);
-                        if (Program.HasId(id))
+                        if (id.Length == 0) {
+                            // user cancelled
+                        }
+                        else if (Program.HasId(id))
                         {
                             MessageBox.Show("ID " + id + " already exist!", "ID collision", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         }
                         else {
                             node.id = "pending-set";
+                            Program.blockedIds.Add(id);
                             node.tempId = id;
                         }
                     }
@@ -111,9 +116,14 @@ namespace BeaconManager
             listView1.BeginUpdate(); // Tell GUI to catch the update
             foreach (KeyValuePair<string, BeaconNode> node in Program.nodes.OrderBy(i => i.Value.lastPing))
             {
+                ListViewItem lv;
+                if (DateTime.Now.Subtract(node.Value.lastPing).TotalMilliseconds > 20000)
+                {
+                    node.Value.offline = true;
+                }
                 if (!listView1.Items.ContainsKey(node.Value.ipAddress)) // Add if it not in the list view
                 {
-                    ListViewItem lv = new ListViewItem(node.Value.id); // initiate with 1st column value
+                    lv = new ListViewItem(node.Value.id); // initiate with 1st column value
                     lv.Name = node.Value.ipAddress; // set the identifier of the list view item. it's ip
                     lv.SubItems.Add(node.Value.ipAddress); // set 2nd column values
                     lv.SubItems.Add(node.Value.macAddress);
@@ -123,13 +133,19 @@ namespace BeaconManager
                     listView1.Items.Add(lv);
                 }
                 else { // update if already in the list view
-                    ListViewItem lv = listView1.Items.Find(node.Value.ipAddress, false)[0];
+                    lv = listView1.Items.Find(node.Value.ipAddress, false)[0];
                     lv.SubItems[0].Text = node.Value.id;
                     lv.SubItems[1].Text = node.Value.ipAddress;
                     lv.SubItems[2].Text = node.Value.macAddress;
                     lv.SubItems[3].Text = node.Value.lastPing.ToString();
                     lv.SubItems[4].Text = node.Value.upTimeMinutes.ToString();
                     lv.SubItems[5].Text = node.Value.batteryLevel.ToString();
+                }
+                if (node.Value.offline) {
+                    lv.ForeColor = Color.Gray;
+                } else
+                {
+                    lv.ForeColor = Color.Black;
                 }
             }
             listView1.EndUpdate();

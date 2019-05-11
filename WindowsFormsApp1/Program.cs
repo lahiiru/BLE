@@ -19,6 +19,7 @@ namespace BeaconManager
         public static bool active = true;
         public static string log = "";
         public static readonly Dictionary<string, BeaconNode> nodes = new Dictionary<string, BeaconNode>();
+        public static List<string> blockedIds = new List<string>();
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -88,7 +89,19 @@ namespace BeaconManager
 
         public static bool HasId(string id) {
             foreach(BeaconNode node in nodes.Values) {
-                if (node.tempId == id || node.id == id) {
+                if (node.id == id) {
+                    return true;
+                }
+            }
+            foreach (string sid in Properties.Settings.Default.ids)
+            {
+                if (sid == id)
+                {
+                    return true;
+                }
+            }
+            foreach (string bid in blockedIds) {
+                if (bid == id) {
                     return true;
                 }
             }
@@ -105,13 +118,24 @@ namespace BeaconManager
             Console.WriteLine(stringFrame);
             string[] tokens = stringFrame.Split('`'); // comming data seperated by :
             node.lastPing = DateTime.Now;
+            node.offline = false;
             node.status = tokens[0];
             if ("pending-set".Equals(node.id) && node.tempId != tokens[1])
             {
-
+                // still node haven't picked the given id.
             }
             else {
-                node.id = tokens[1];
+                if (("pending-set".Equals(node.id) || "not-set".Equals(node.id)) && node.tempId == tokens[1])
+                {
+                    // node just picked the given id
+                    node.id = tokens[1];
+                    Properties.Settings.Default.ids.Add(node.id);
+                    Properties.Settings.Default.Save();
+                    blockedIds.RemoveAll(s => s == node.id);
+                }
+                else { // regular id update
+                    node.id = tokens[1];
+                }
             }
             node.upTimeMinutes = int.Parse(tokens[2]);
             node.batteryLevel = int.Parse(tokens[3]);
@@ -129,6 +153,9 @@ namespace BeaconManager
         private static byte[] BuildManagementFrame(string ip, BeaconNode node) {
             string managementFrame = "OK";
             if ("not-set".Equals(node.id) || "pending-set".Equals(node.id)) { // if client id is in not-set status, we need to tell an id
+                if (node.tempId == null) {
+                    node.tempId = Program.GetNewID().ToString();
+                }
                 managementFrame = "ID:" + node.tempId;
             }
             return Encoding.ASCII.GetBytes(managementFrame);
@@ -136,9 +163,35 @@ namespace BeaconManager
 
         public static int GetNewID()
         {
-            int id = Properties.Settings.Default.lastID;
-            id = id + 1;
-            Properties.Settings.Default.lastID = id;
+            System.Collections.Specialized.StringCollection ids = Properties.Settings.Default.ids;
+            if (ids == null) {
+                ids = new System.Collections.Specialized.StringCollection();
+                Properties.Settings.Default.ids = ids;
+                Properties.Settings.Default.Save();
+            }
+            int id = 0;
+            bool found = false;
+            while (!found) {
+                id++;
+                found = true;
+                foreach (String sid in ids)
+                {
+                    if (id.ToString().Equals(sid)) {
+                        found = false;
+                        break;
+                    }
+                }
+                foreach (String sid in blockedIds)
+                {
+                    if (id.ToString().Equals(sid))
+                    {
+                        found = false;
+                        break;
+                    }
+                }
+
+            }
+            blockedIds.Add(id.ToString());
             return id;
         }
 

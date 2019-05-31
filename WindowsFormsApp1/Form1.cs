@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Text;
 using System.Windows.Forms;
 using Microsoft.VisualBasic;
 
@@ -18,7 +19,12 @@ namespace BeaconManager
 
         private void Form1_Closed(object sender, EventArgs e)
         {
-            Environment.Exit(1); // stop the application including running listner threads
+            /*
+            Program.active = false;
+            if (Program.newsock != null) {
+                Program.newsock.Close();
+            }*/
+            Environment.Exit(0); // stop the application including running listner threads
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -80,7 +86,7 @@ namespace BeaconManager
                         if (id.Length == 0) {
                             // user cancelled
                         }
-                        else if (Program.HasId(id))
+                        else if (Program.HasId(node.ipAddress, id))
                         {
                             MessageBox.Show("ID " + id + " already exist!", "ID collision", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         }
@@ -119,7 +125,7 @@ namespace BeaconManager
                 ListViewItem lv;
                 if (DateTime.Now.Subtract(node.Value.lastPing).TotalMilliseconds > 20000)
                 {
-                    node.Value.offline = true;
+                    node.Value.offline = !Ping(node.Value.ipAddress);
                 }
                 if (!listView1.Items.ContainsKey(node.Value.ipAddress)) // Add if it not in the list view
                 {
@@ -149,9 +155,43 @@ namespace BeaconManager
                 }
             }
             listView1.EndUpdate();
+            textBox2.Text = "";
+            if (Properties.Settings.Default.ids != null) {
+                foreach (string s in Properties.Settings.Default.ids) {
+                    textBox2.Text += s + "\n";
+                }
+            }
+        }
+
+        private bool Ping(string ip)
+        {
+            Ping pingSender = new Ping();
+            PingOptions options = new PingOptions();
+
+            // Use the default Ttl value which is 128,
+            // but change the fragmentation behavior.
+            options.DontFragment = true;
+
+            // Create a buffer of 32 bytes of data to be transmitted.
+            string data = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+            byte[] buffer = Encoding.ASCII.GetBytes(data);
+            int timeout = 120;
+            PingReply reply = pingSender.Send(ip, timeout, buffer, options);
+            if (reply.Status == IPStatus.Success)
+            {
+                Console.WriteLine("Address: {0}", reply.Address.ToString());
+                Console.WriteLine("RoundTrip time: {0}", reply.RoundtripTime);
+                return true;
+            }
+            return false;
         }
 
         private void contextMenuStrip1_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+
+        }
+
+        private void textBox2_TextChanged(object sender, EventArgs e)
         {
 
         }

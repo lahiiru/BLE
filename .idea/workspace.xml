@@ -3,6 +3,17 @@
   <component name="ChangeListManager">
     <list default="true" id="39d1c1e8-1622-4320-b743-68509d01c920" name="Default Changelist" comment="fixes for windows">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WindowsFormsApp1/BeaconNode.cs" beforeDir="false" afterPath="$PROJECT_DIR$/WindowsFormsApp1/BeaconNode.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WindowsFormsApp1/Form1.cs" beforeDir="false" afterPath="$PROJECT_DIR$/WindowsFormsApp1/Form1.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WindowsFormsApp1/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/WindowsFormsApp1/Program.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WindowsFormsApp1/Properties/Settings.Designer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/WindowsFormsApp1/Properties/Settings.Designer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WindowsFormsApp1/Properties/Settings.settings" beforeDir="false" afterPath="$PROJECT_DIR$/WindowsFormsApp1/Properties/Settings.settings" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WindowsFormsApp1/bin/Debug/BeaconManager.exe" beforeDir="false" afterPath="$PROJECT_DIR$/WindowsFormsApp1/bin/Debug/BeaconManager.exe" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WindowsFormsApp1/bin/Debug/BeaconManager.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/WindowsFormsApp1/bin/Debug/BeaconManager.pdb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WindowsFormsApp1/obj/Debug/BeaconManager.exe" beforeDir="false" afterPath="$PROJECT_DIR$/WindowsFormsApp1/obj/Debug/BeaconManager.exe" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WindowsFormsApp1/obj/Debug/BeaconManager.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/WindowsFormsApp1/obj/Debug/BeaconManager.pdb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/WindowsFormsApp1/obj/Debug/TempPE/Properties.Resources.Designer.cs.dll" beforeDir="false" afterPath="$PROJECT_DIR$/WindowsFormsApp1/obj/Debug/TempPE/Properties.Resources.Designer.cs.dll" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/beacon_udp.py" beforeDir="false" afterPath="$PROJECT_DIR$/beacon_udp.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -20,13 +31,13 @@
     <session id="-1834308855">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="3" />
+          <entry key="project.closed" value="4" />
           <entry key="project.open.time.0" value="1" />
           <entry key="project.open.time.11" value="2" />
-          <entry key="project.open.time.7" value="2" />
+          <entry key="project.open.time.7" value="3" />
           <entry key="project.open.time.8" value="3" />
-          <entry key="project.open.time.9" value="1" />
-          <entry key="project.opened" value="9" />
+          <entry key="project.open.time.9" value="2" />
+          <entry key="project.opened" value="11" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
@@ -43,16 +54,16 @@
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="Python Console" value="137" />
+          <entry key="Python Console" value="173" />
           <entry key="dummy" value="35" />
-          <entry key="py" value="2950" />
+          <entry key="py" value="3014" />
           <entry key="txt" value="98" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="PLAIN_TEXT" value="133" />
-          <entry key="Python" value="3087" />
+          <entry key="Python" value="3187" />
         </counts>
       </usages-collector>
     </session>
@@ -62,11 +73,11 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/beacon_udp.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="242">
-              <caret line="257" column="27" lean-forward="true" selection-start-line="257" selection-start-column="27" selection-end-line="257" selection-end-column="27" />
+            <state relative-caret-position="286">
+              <caret line="79" lean-forward="true" selection-start-line="79" selection-end-line="79" />
               <folding>
                 <element signature="e#0#25#0" expanded="true" />
-                <marker date="1555956355553" expanded="true" signature="4184:4227" ph="..." />
+                <marker date="1557452022270" expanded="true" signature="4555:4598" ph="..." />
               </folding>
             </state>
           </provider>
@@ -105,8 +116,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/transmitter.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="357">
-              <caret line="109" lean-forward="true" selection-start-line="109" selection-end-line="109" />
+            <state relative-caret-position="167">
+              <caret line="157" selection-start-line="157" selection-end-line="167" />
               <folding>
                 <element signature="e#19#30#0" expanded="true" />
               </folding>
@@ -125,7 +136,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>_update_temp_value</find>
       <find>temperature_cb</find>
       <find>[constants.GATT_CHRC_IFACE]['Value']</find>
       <find>cpu_temp_sint16</find>
@@ -155,6 +165,7 @@
       <find>start n</find>
       <find>'ID_CHRC'</find>
       <find>time_to_ping</find>
+      <find>bs = readBytes('/home/pi/id')</find>
     </findStrings>
     <replaceStrings>
       <replace>DEV_IDS_CHRC</replace>
@@ -193,7 +204,7 @@
     <detection-done>true</detection-done>
     <sorting>DEFINITION_ORDER</sorting>
   </component>
-  <component name="ProjectFrameBounds" extendedState="7">
+  <component name="ProjectFrameBounds" extendedState="6">
     <option name="x" value="665" />
     <option name="y" value="60" />
     <option name="width" value="980" />
@@ -204,6 +215,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -215,7 +227,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -421,10 +432,10 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-7" y="-7" width="1550" height="838" extended-state="7" />
+    <frame x="-7" y="-7" width="1550" height="838" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.09932886" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.21744967" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -439,14 +450,14 @@
       <window_info anchor="bottom" id="Database Changes" order="9" show_stripe_button="false" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" weight="0.3286119" />
       <window_info anchor="bottom" id="Terminal" order="11" weight="0.3286119" />
-      <window_info anchor="bottom" id="Python Console" order="12" weight="0.18887262" />
-      <window_info active="true" anchor="bottom" id="File Transfer" order="13" visible="true" weight="0.21815519" />
+      <window_info anchor="bottom" id="Python Console" order="12" visible="true" weight="0.3338214" />
+      <window_info anchor="bottom" id="File Transfer" order="13" weight="0.33089313" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="right" id="SciView" order="3" />
       <window_info anchor="right" id="Database" order="4" />
-      <window_info anchor="right" id="Remote Host" order="5" visible="true" weight="0.18590604" />
+      <window_info active="true" anchor="right" id="Remote Host" order="5" visible="true" weight="0.2033557" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -512,26 +523,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="814">
           <caret line="38" column="33" selection-start-line="38" selection-start-column="23" selection-end-line="38" selection-end-column="33" />
-          <folding>
-            <element signature="e#0#23#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/client.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="66">
-          <caret line="5" column="25" selection-start-line="5" selection-start-column="25" selection-end-line="5" selection-end-column="25" />
-          <folding>
-            <element signature="e#0#23#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/server.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="220">
-          <caret line="10" selection-start-line="10" selection-end-line="10" />
         </state>
       </provider>
     </entry>
@@ -594,16 +585,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/transmitter.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="357">
-          <caret line="109" lean-forward="true" selection-start-line="109" selection-end-line="109" />
-          <folding>
-            <element signature="e#19#30#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/config.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="88">
@@ -611,13 +592,40 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/client.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="66">
+          <caret line="5" column="25" selection-start-line="5" selection-start-column="25" selection-end-line="5" selection-end-column="25" />
+          <folding>
+            <element signature="e#0#23#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/server.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="220">
+          <caret line="10" selection-start-line="10" selection-end-line="10" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/transmitter.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="167">
+          <caret line="157" selection-start-line="157" selection-end-line="167" />
+          <folding>
+            <element signature="e#19#30#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/beacon_udp.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="242">
-          <caret line="257" column="27" lean-forward="true" selection-start-line="257" selection-start-column="27" selection-end-line="257" selection-end-column="27" />
+        <state relative-caret-position="286">
+          <caret line="79" lean-forward="true" selection-start-line="79" selection-end-line="79" />
           <folding>
             <element signature="e#0#25#0" expanded="true" />
-            <marker date="1555956355553" expanded="true" signature="4184:4227" ph="..." />
+            <marker date="1557452022270" expanded="true" signature="4555:4598" ph="..." />
           </folding>
         </state>
       </provider>

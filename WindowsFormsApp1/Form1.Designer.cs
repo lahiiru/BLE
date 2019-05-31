@@ -43,6 +43,7 @@
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.changeIDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.textBox2 = new System.Windows.Forms.TextBox();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -55,6 +56,7 @@
             this.LastPing,
             this.upTime,
             this.battery});
+            this.listView1.HideSelection = false;
             this.listView1.Location = new System.Drawing.Point(22, 69);
             this.listView1.MultiSelect = false;
             this.listView1.Name = "listView1";
@@ -126,12 +128,12 @@
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(23, 441);
+            this.textBox1.Location = new System.Drawing.Point(216, 423);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
             this.textBox1.ReadOnly = true;
             this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox1.Size = new System.Drawing.Size(880, 94);
+            this.textBox1.Size = new System.Drawing.Size(686, 198);
             this.textBox1.TabIndex = 3;
             // 
             // contextMenuStrip1
@@ -149,11 +151,23 @@
             this.changeIDToolStripMenuItem.Size = new System.Drawing.Size(147, 24);
             this.changeIDToolStripMenuItem.Text = "Change ID";
             // 
+            // textBox2
+            // 
+            this.textBox2.Location = new System.Drawing.Point(23, 423);
+            this.textBox2.Multiline = true;
+            this.textBox2.Name = "textBox2";
+            this.textBox2.ReadOnly = true;
+            this.textBox2.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox2.Size = new System.Drawing.Size(177, 198);
+            this.textBox2.TabIndex = 4;
+            this.textBox2.TextChanged += new System.EventHandler(this.textBox2_TextChanged);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(925, 561);
+            this.ClientSize = new System.Drawing.Size(925, 633);
+            this.Controls.Add(this.textBox2);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
@@ -164,6 +178,7 @@
             this.Name = "Form1";
             this.Text = "Dashboard";
             this.Load += new System.EventHandler(this.Form1_Load);
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_Closed);
             this.contextMenuStrip1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -185,6 +200,7 @@
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.ToolStripMenuItem changeIDToolStripMenuItem;
+        private System.Windows.Forms.TextBox textBox2;
     }
 }
 

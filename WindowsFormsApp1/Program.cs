@@ -16,6 +16,7 @@ namespace BeaconManager
         static TcpListener listen;
         static Form1 form;
         public static Thread serverthread;
+        public static UdpClient newsock = null;
         public static bool active = true;
         public static string log = "";
         public static readonly Dictionary<string, BeaconNode> nodes = new Dictionary<string, BeaconNode>();
@@ -50,7 +51,7 @@ namespace BeaconManager
         {
             byte[] data = new byte[1024];
             IPEndPoint ipep = new IPEndPoint(IPAddress.Any, 9091); // start listnening on port
-            UdpClient newsock = new UdpClient(ipep);
+            newsock = new UdpClient(ipep);
 
             IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0); // empty sender is needed as reference to catch senders information
 
@@ -87,7 +88,21 @@ namespace BeaconManager
             newsock.Close();
         }
 
-        public static bool HasId(string id) {
+        public static bool HasReserved(string ip, string id) {
+            foreach (string sid in Properties.Settings.Default.ids)
+            {
+                string[] data = sid.Split(':');
+                string _ip = data[0];
+                string _id = data[1];
+                if (id.Equals(_id) && ip.Equals(_ip))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public static bool HasId(string ip, string id) {
             foreach(BeaconNode node in nodes.Values) {
                 if (node.id == id) {
                     return true;
@@ -95,7 +110,10 @@ namespace BeaconManager
             }
             foreach (string sid in Properties.Settings.Default.ids)
             {
-                if (sid == id)
+                string[] data = sid.Split(':');
+                string _ip = data[0];
+                string _id = data[1];
+                if (id.Equals(_id) && !ip.Equals(_ip))
                 {
                     return true;
                 }
@@ -129,12 +147,37 @@ namespace BeaconManager
                 {
                     // node just picked the given id
                     node.id = tokens[1];
-                    Properties.Settings.Default.ids.Add(node.id);
+                    string[] ids = new string[Properties.Settings.Default.ids.Count];
+                    Properties.Settings.Default.ids.CopyTo(ids, 0);
+                    foreach (string s in ids)
+                    {
+                        if (s.StartsWith(node.ipAddress))
+                        {
+                            Properties.Settings.Default.ids.Remove(s);
+                        }
+                    }
+                    Properties.Settings.Default.ids.Add(node.ipAddress + ":" + node.id);
                     Properties.Settings.Default.Save();
                     blockedIds.RemoveAll(s => s == node.id);
                 }
                 else { // regular id update
                     node.id = tokens[1];
+                    
+                    if (!HasReserved(node.ipAddress, node.id))
+                    {
+                        if (Properties.Settings.Default.ids != null)
+                        {
+                            string[] ids = new string[Properties.Settings.Default.ids.Count];
+                            Properties.Settings.Default.ids.CopyTo(ids, 0);
+                            foreach (string s in ids) {
+                                if (s.StartsWith(node.ipAddress)) {
+                                    Properties.Settings.Default.ids.Remove(s);
+                                }
+                            }
+                            Properties.Settings.Default.ids.Add(node.ipAddress + ":" + node.id);
+                            Properties.Settings.Default.Save();
+                        }
+                    }
                 }
             }
             node.upTimeMinutes = int.Parse(tokens[2]);
@@ -154,14 +197,14 @@ namespace BeaconManager
             string managementFrame = "OK";
             if ("not-set".Equals(node.id) || "pending-set".Equals(node.id)) { // if client id is in not-set status, we need to tell an id
                 if (node.tempId == null) {
-                    node.tempId = Program.GetNewID().ToString();
+                    node.tempId = Program.GetNewID(node.ipAddress).ToString();
                 }
                 managementFrame = "ID:" + node.tempId;
             }
             return Encoding.ASCII.GetBytes(managementFrame);
         }
 
-        public static int GetNewID()
+        public static int GetNewID(string ip)
         {
             System.Collections.Specialized.StringCollection ids = Properties.Settings.Default.ids;
             if (ids == null) {
@@ -174,9 +217,12 @@ namespace BeaconManager
             while (!found) {
                 id++;
                 found = true;
-                foreach (String sid in ids)
+                foreach (string sid in ids)
                 {
-                    if (id.ToString().Equals(sid)) {
+                    string[] data = sid.Split(':');
+                    string _ip = data[0];
+                    string _id = data[1];
+                    if (id.ToString().Equals(_id) && !ip.Equals(_ip)) {
                         found = false;
                         break;
                     }
